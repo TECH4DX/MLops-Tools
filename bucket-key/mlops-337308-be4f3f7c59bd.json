@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "mlops-337308",
+  "private_key_id": "be4f3f7c59bde175924e036c8b54ebf02f991313",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC2UDaHtCAPGxa7\ntaXhaEc81+3y9YJES6FrKHGcLa8bU6zyvCRTHVPQHNQYeclxhYqlE1kYvMBdTQj0\nA3RUveRulOYXZB2n2EVB5kGyfmC6/a5/G651ZNRdS/zY6kxztafm/hIc4kbI6DGw\n+ZgbrsjLkNmTLN5nMLumZZI4O75LAAORUpVrgrZBqUd1/N0AlGsrb3VFpyJKSEn8\nuI9IItUdamslpP+/1IqM19MZyGMrGhANhAssq9K7D0PwbcMwcsIDUzeh5xoDCo/N\np6F4sDE/ud+6++0xEi9YUKKIJJq8ngyBIJJk7eov7Fosw0+xjhFW9upGNXL5GvIT\naK7f81X/AgMBAAECggEALebXO+aNldAPsrYi7DQ5j2ecWOoYYMKcAyNdK2HTLzGr\nnzfge26sXf8MJZdwMR1a0YIkEhbf5f3RzcIa5YUkAPWLUwNZdht9IIDtNJgeGaZq\na0VYcOUwlMbfg+vF0PJBMmbwv4X3JXlUnYbSFdI1aw9uwF/xJRD/hf8XyAG+wRnz\nVsoFtkJ65wJWbQh4I5IZ3mLr4tFfE65cu6HIOJSfDeB1sTvn7YUE78JnjOwuUZIZ\nJ1W7BNNu3TmZ1HuK7qLoWYRlDwRTNo3QycKVVViKAulab6jgtG5jCvZwtvGLPINW\ngm1benNoVSULFH034rP4RWj0ia0hQHTEeQXTa3fWMQKBgQD6JZUVq/QPZ9a5XtKf\n/7Ah1PjQ/GKhmYz/lNgCwQW19KuD47DIhQ+8mWB0tnAuW4R2ApvJk/lRfQVhGVLa\nk0XVftxS4+HvRYGz3Lx3wR+UwNZdyAfRy3HlzuxG+pXjIvoqJLfj5v0iBTNWHwmH\nU2egGpr90lZBM1SrNNZunuhizwKBgQC6lEw574KYJp/KwUEKzhvElimHkJejxqeg\nixpd3piCBMxIn/C86biMb5wGbCk7WqrCoUr4fYweW2iQRw+ff418zCF19AtKq+Tb\nHCEFTiEMJdgjQUZIWo4Sy6PVTGhG2qVBxaubDBp1K5ftYtufRUZNWCxjMTPh5tIL\nuw+yIpFl0QKBgQDhDvc3bGJFihNy7JFsSsvZZJgIz0qeQlzNhslikO/maZ/3JeBk\nSPODqCtUVuBPlR90XZx0nKHwYx934STeayqlj2IDYexhLpQnky4uQJ99YpJ8BgCj\nDPwI20dSBRreJRYW3LpmXejZtvwdPAeCrdPKBKX2QExClUBUWVGkbWx/mQKBgQCb\nLXoUeXKJbx5ZeM/K189aenXB7W1hZnjGWsssJVV8Vdc90+BajpzSGIWRBeZpGiiJ\nxbJf57NhEC9wR9njkyevEuwFeVrm2P53ifagvfFYdCVGdSSqSr59PWdeoLTdsT3e\n7TOjubZLm105r43v8qLc8ye/vA1lph8uaH9Obde18QKBgQDZEaHtEorVEIfYwPml\njye2MkuSj5cP5Z2l7r+Jnee7+axR6/Z6DAzXG74xTLrogNIF1jhY8Tfd0ZODCmtE\nAHlNJSOoVVJgBk0aBNjfwEsg3bLcr2+7JSXJdpsewmC1Dx7RgErkB8gm6kTH46AD\nD5Wvaihy9D4iKJ7uDpBy+nrw1g==\n-----END PRIVATE KEY-----\n",
+  "client_email": "mlops-bucket-example-service-a@mlops-337308.iam.gserviceaccount.com",
+  "client_id": "102509280948376804209",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mlops-bucket-example-service-a%40mlops-337308.iam.gserviceaccount.com"
+}

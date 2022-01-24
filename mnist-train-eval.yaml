@@ -16,7 +16,7 @@ spec:
         arguments:
           artifacts:
           - name: model-path
-            from: "{{steps.generate-artifact.outputs.artifacts.hello-art}}"
+            from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
 
   - name: train
     container:
@@ -37,9 +37,9 @@ spec:
   - name: eval
     inputs:
       artifacts:
-      - name: model-saved
+      - name: model-path
         path: /mnist-example/ckpt
     container:
-      image: alpine:latest
+      image: guoqiangqi/mnist-example:v1.0
       command: ['IS_TRAIN=False','python3']
       args: ["mnist_train_eval.py"]

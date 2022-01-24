@@ -29,7 +29,7 @@ spec:
     outputs:
       artifacts:
       - name: model-saved
-        path: /mnist-example/
+        path: /mnist-example/ckpt
         gcs:
           bucket: mlops-example-bucket
           key: mnist-example-models
@@ -41,7 +41,7 @@ spec:
     inputs:
       artifacts:
       - name: model-path
-        path: /mnist-example/
+        path: /mnist-example/ckpt
     container:
       image: guoqiangqi/mnist-example:v1.0
       env:

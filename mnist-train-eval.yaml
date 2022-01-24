@@ -21,12 +21,15 @@ spec:
   - name: train
     container:
       image: guoqiangqi/mnist-example:v1.0
-      command: ['IS_TRAIN=True','python3']
+      env:
+      - name: IS_TRAIN
+        value: "True"
+      command: ['python3']
       args: ["mnist_train_eval.py"]
     outputs:
       artifacts:
       - name: model-saved
-        path: /mnist-example/ckpt
+        path: /mnist-example/
         gcs:
           bucket: mlops-example-bucket
           key: mnist-example-models
@@ -38,8 +41,11 @@ spec:
     inputs:
       artifacts:
       - name: model-path
-        path: /mnist-example/ckpt
+        path: /mnist-example/
     container:
       image: guoqiangqi/mnist-example:v1.0
-      command: ['IS_TRAIN=False','python3']
+      env:
+      - name: IS_TRAIN
+        value: "False"
+      command: ['python3']
       args: ["mnist_train_eval.py"]

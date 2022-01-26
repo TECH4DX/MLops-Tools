@@ -29,6 +29,7 @@ spec:
   - name: train
     container:
       image: guoqiangqi/mnist-example:v1.0
+      imagePullPolicy: Always
       env:
       - name: IS_TRAIN
         value: "True"
@@ -54,6 +55,7 @@ spec:
         path: /mnist-example/ckpt
     container:
       image: guoqiangqi/mnist-example:v1.0
+      imagePullPolicy: Always
       env:
       - name: IS_TRAIN
         value: "False"
@@ -67,6 +69,7 @@ spec:
         path: /mnist-serving/mnist/data/ckpt
     container:
       image: guoqiangqi/mnist-serving:v1.0
+      imagePullPolicy: Always
       ports:
       - containerPort: 9003
       command: ['python3']

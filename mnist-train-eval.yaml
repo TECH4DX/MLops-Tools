@@ -6,6 +6,7 @@ metadata:
   generateName: mnist-train-eval-
 spec:
   entrypoint: mnist-controller
+  onExit: delete
   templates:
   - name: mnist-controller
     steps:
@@ -81,6 +82,26 @@ spec:
   - name: create-service
     resource:
         action: create
+        manifest: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: mnist-web
+            labels:
+              app: mnist-web
+          spec:
+            ports:
+              - port: 9003
+                targetPort: 9003
+                nodePort: 9003
+                protocol: TCP
+            type: NodePort
+            selector:
+              app: mnist-web
+
+  - name: delete
+    resource:
+        action: delete
         manifest: |
           apiVersion: v1
           kind: Service

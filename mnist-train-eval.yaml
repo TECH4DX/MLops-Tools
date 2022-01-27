@@ -1,5 +1,8 @@
 # This example demonstrates the ability to pass artifacts
 # from one step to the next.
+# NOTE : you need a GCS service when passing artifacts, set access to your GCS bucket with command below:
+# $ kubectl create secret generic my-gcs-credentials --from-file=serviceAccountKey=<YOUR-SERVICE-ACCOUNT-KEY-file>
+
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:

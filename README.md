@@ -57,4 +57,9 @@ $ kubectl apply -f ./mnist-train-eval.yaml -n argo
 ```
 
 ## Few things to take care of
-- TODO
+- The current default setting of Argo needs to use the token to login, you may need to generate a token with shell script we provided:
+    ```bash
+    $ ./mlops/gen_token.sh
+    # Copy the output starting with 'Bearer' to the token box of the Argo login interface (https://MASTER_NODE_IP:2746)
+    # Now you can see all the workflows in argo namespace on https://MASTER_NODE_IP:2746/workflows/argo web.
+    ```

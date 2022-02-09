@@ -63,3 +63,8 @@ $ kubectl apply -f ./mnist-train-eval.yaml -n argo
     # Copy the output starting with 'Bearer' to the token box of the Argo login interface (https://MASTER_NODE_IP:2746)
     # Now you can see all the workflows in argo namespace on https://MASTER_NODE_IP:2746/workflows/argo web.
     ```
+    Argo url: `https://MASTER_NODE_IP:2746`
+
+- Once all three steps in workflow `mnist-train-eval` passed, you can get the mnist webpage with url `https://MASTER_NODE_IP:9003` . Draw a digit and test it.
+
+- Before you deploy the public network service, please make sure that the firewall policy of your cloud server allows outgoing communication on the required port, such as 2746 and 9003 .

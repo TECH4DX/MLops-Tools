@@ -14289,6 +14289,8 @@ spec:
   - name: https
     port: 8443
     targetPort: https
+    nodePort: 2745
+  type: NodePort  
   selector:
     control-plane: controller-manager
 ---

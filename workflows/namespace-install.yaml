@@ -694,105 +694,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - secrets
-  verbs:
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
-  name: argo-aggregate-to-admin
-rules:
-- apiGroups:
-  - argoproj.io
-  resources:
-  - workflows
-  - workflows/finalizers
-  - workfloweventbindings
-  - workfloweventbindings/finalizers
-  - workflowtemplates
-  - workflowtemplates/finalizers
-  - cronworkflows
-  - cronworkflows/finalizers
-  - clusterworkflowtemplates
-  - clusterworkflowtemplates/finalizers
-  - workflowtasksets
-  - workflowtasksets/finalizers
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
-  name: argo-aggregate-to-edit
-rules:
-- apiGroups:
-  - argoproj.io
-  resources:
-  - workflows
-  - workflows/finalizers
-  - workfloweventbindings
-  - workfloweventbindings/finalizers
-  - workflowtemplates
-  - workflowtemplates/finalizers
-  - cronworkflows
-  - cronworkflows/finalizers
-  - clusterworkflowtemplates
-  - clusterworkflowtemplates/finalizers
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    rbac.authorization.k8s.io/aggregate-to-view: "true"
-  name: argo-aggregate-to-view
-rules:
-- apiGroups:
-  - argoproj.io
-  resources:
-  - workflows
-  - workflows/finalizers
-  - workfloweventbindings
-  - workfloweventbindings/finalizers
-  - workflowtemplates
-  - workflowtemplates/finalizers
-  - cronworkflows
-  - cronworkflows/finalizers
-  - clusterworkflowtemplates
-  - clusterworkflowtemplates/finalizers
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: argo-cluster-role
-rules:
-- apiGroups:
-  - ""
-  resources:
   - pods
   - pods/exec
   verbs:
@@ -841,12 +742,17 @@ rules:
   resources:
   - workflowtemplates
   - workflowtemplates/finalizers
-  - clusterworkflowtemplates
-  - clusterworkflowtemplates/finalizers
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+  - list
 - apiGroups:
   - argoproj.io
   resources:
@@ -862,6 +768,12 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
 - apiGroups:
   - argoproj.io
   resources:
@@ -891,9 +803,9 @@ rules:
   - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
-  name: argo-server-cluster-role
+  name: argo-server-role
 rules:
 - apiGroups:
   - ""
@@ -948,7 +860,7 @@ rules:
   - workfloweventbindings
   - workflowtemplates
   - cronworkflows
-  - clusterworkflowtemplates
+  - cronworkflows/finalizers
   verbs:
   - create
   - get
@@ -971,30 +883,16 @@ subjects:
   name: argo
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: argo-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: argo-cluster-role
-subjects:
-- kind: ServiceAccount
-  name: argo
-  namespace: argo
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: argo-server-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: argo-server-cluster-role
+  kind: Role
+  name: argo-server-role
 subjects:
 - kind: ServiceAccount
   name: argo-server
-  namespace: argo
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1050,6 +948,7 @@ spec:
       containers:
       - args:
         - server
+        - --namespaced
         env: []
         image: quay.io/argoproj/argocli:latest
         name: argo-server
@@ -1098,6 +997,7 @@ spec:
         - workflow-controller-configmap
         - --executor-image
         - quay.io/argoproj/argoexec:latest
+        - --namespaced
         command:
         - workflow-controller
         env:

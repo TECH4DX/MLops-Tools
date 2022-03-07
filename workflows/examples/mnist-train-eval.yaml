@@ -8,6 +8,7 @@ kind: Workflow
 metadata:
   generateName: mnist-train-eval-
 spec:
+  serviceAccountName: mnist-sa
   entrypoint: mnist-controller
   onExit: delete
   templates:
@@ -47,7 +48,7 @@ spec:
         path: /mnist-example/ckpt
         gcs:
           bucket: mlops-example-bucket
-          key: mnist-example-models
+          key: mnist-example-models-demo
           serviceAccountKeySecret:
             name: mlops-bucket-serviceaccount
             key: serviceAccountKey

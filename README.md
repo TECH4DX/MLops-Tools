@@ -1,13 +1,13 @@
 # MLops platform installation guide
 
 ## Argo Workflow Install
-You need to configure the ArgoWorkflow environment before deploy your own workflows. Fortunately, it is extremely convenient to install ArgoWorkflow based on the cloud-native k8s environment. Make sure you have `kubectl` configured correctly on your machine, use `kubectl apply` command with installation yaml file in `mlops/` folder to install Argo:
+You need to configure the ArgoWorkflow environment before deploy your own workflows. Fortunately, it is extremely convenient to install ArgoWorkflow based on the cloud-native k8s environment. Make sure you have `kubectl` configured correctly on your machine, use `kubectl apply` command with installation yaml file in `workflows/` folder to install Argo:
 
 ```bash
 # Create specific namespace for ArgoWorkflow
 $ kubectl create ns argo
 # Install ArgoWorkflow
-$ kubectl apply -f mlops/install.yaml -n argo
+$ kubectl apply -f workflows/install.yaml -n argo
 ```
 
 **Optional:** Download the latest Argo CLI from official [releases page](https://github.com/argoproj/argo-workflows/releases/latest) which includes the guide on setting up.
@@ -45,8 +45,8 @@ Feel free to choose your favorite docker registry(dockerhub, huaweicloud swr...)
 After building and pushing the images, specify the image url in the corresponding yaml file, `mnist-train-eval.yaml` in this demo.
 
 ```bash 
-$ cd mlops
-$ vim mnist-train-eval.yaml
+$ cd workflows
+$ vim examples/mnist-train-eval.yaml
 # Update the value of 'image' field to your own docker registry url
 ```
 
@@ -54,14 +54,14 @@ $ vim mnist-train-eval.yaml
 Then all you have to do is set up the resources with kubectl:
 ```bash
 # Setup Mnist workflow:
-$ cd mlops
-$ kubectl apply -f ./mnist-train-eval.yaml -n argo
+$ cd workflows
+$ kubectl apply -f ./examples/mnist-train-eval.yaml -n argo
 ```
 
 ## Few things to take care of
 - The current default setting of Argo needs to use the token to login, you may need to generate a token with shell script we provided:
     ```bash
-    $ ./mlops/gen_token.sh
+    $ ./workflows/gen_token.sh
     # Copy the output starting with 'Bearer' to the token box of the Argo login interface (https://MASTER_NODE_IP:2746)
     # Now you can see all the workflows in argo namespace on https://MASTER_NODE_IP:2746/workflows/argo web.
     ```

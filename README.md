@@ -18,8 +18,18 @@ To run Argo workflows that use artifacts, such as `Mnist` we are running, you mu
 
 2.  Create the Service Account key and store it as a K8s secret:
     ```bash
-    $ kubectl create secret generic mlops-bucket-serviceaccount --from-file=serviceAccountKey=<YOUR-SERVICE-ACCOUNT-KEY-file> -n argo
+    # Create specific namespace for Mnist Demo
+    $ kubectl create ns mnist-demo
+    # Create secret for GCS used by Mnist workflows
+    $ kubectl create secret generic mlops-bucket-serviceaccount --from-file=serviceAccountKey=<YOUR-SERVICE-ACCOUNT-KEY-file> -n mnist-demo
     ```
+
+## Create Service Account
+To access cluster resources, such as pods and workflows contronller, you should create a new service account with proper authorization.
+
+```bash
+$ kubectl create -f workflows/create-serviceaccounts.yaml -n mnist-demo
+```
 
 ## Build the docker images
 
@@ -55,7 +65,7 @@ Then all you have to do is set up the resources with kubectl:
 ```bash
 # Setup Mnist workflow:
 $ cd workflows
-$ kubectl apply -f ./examples/mnist-train-eval.yaml -n argo
+$ kubectl apply -f ./examples/mnist-train-eval.yaml -n mnist-demo
 ```
 
 ## Few things to take care of

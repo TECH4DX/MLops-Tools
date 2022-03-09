@@ -67,6 +67,7 @@ Then all you have to do is set up the resources with kubectl:
 $ cd workflows
 $ kubectl apply -f ./examples/mnist-train-eval.yaml -n mnist-demo
 ```
+**NOTE:** Once all three steps in workflow `mnist-train-eval` passed, you can visit the mnist website with url `https://MASTER_NODE_IP:9003` . Draw a digit and test it.
 
 ## Argo Events Install
 Argo Events is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. on events from a variety of sources like webhooks, S3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
@@ -160,8 +161,6 @@ If the commands are executed successfully, the eventbus, event-source and sensor
     # Now you can see all the workflows in argo namespace on https://MASTER_NODE_IP:2746/workflows/argo web.
     ```
     Argo url: `https://MASTER_NODE_IP:2746`
-
-- Once all three steps in workflow `mnist-train-eval` passed, you can visit the mnist website with url `https://MASTER_NODE_IP:9003` . Draw a digit and test it.
 
 - Before you deploy the public network service, please make sure that the firewall policy of your cloud server allows outgoing communication on the required port, such as port `2746` and `9003` .
 

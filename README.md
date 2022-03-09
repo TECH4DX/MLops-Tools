@@ -122,9 +122,9 @@ If the commands are executed successfully, the eventbus, event-source and sensor
 
 - Make sure the workflow pod ran successfully. You will see the message printed in the workflow logs
     ```bash
-     _________________________________________
-     < {"message":"this is my first webhook"} >
-    -----------------------------------------
+     _____________________________
+     < this is my first webhook >
+    ------------------------------
         \
         \
         \

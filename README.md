@@ -120,22 +120,10 @@ If the commands are executed successfully, the eventbus, event-source and sensor
    $ kubectl get wf -n argo-events
     ```
 
-- Make sure the workflow pod ran successfully.
+- Make sure the workflow pod ran successfully. You will see the message printed in the workflow logs
     ```bash
      _________________________________________
-    / {"context":{"type":"webhook","specVersi \
-    | on":"0.3","source":"webhook","e |
-    | ventID":"38376665363064642d343336352d34 |
-    | 3035372d393766662d366234326130656232343 |
-    | 337","time":"2020-01-11T16:55:42.996636 |
-    | Z","dataContentType":"application/json" |
-    | ,"subject":"example"},"data":"eyJoZWFkZ |
-    | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
-    | LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |
-    | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
-    | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
-    | jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |
-    \ IHdlYmhvb2sifX0="}                      /
+     < {"message":"this is my first webhook"} >
     -----------------------------------------
         \
         \
@@ -149,8 +137,6 @@ If the commands are executed successfully, the eventbus, event-source and sensor
             \    \        __/
             \____\______/
     ```
-
-**Note:** You will see the message printed in the workflow logs contains both the event context and data, with data being base64 encoded.
 
 
 ## Few things to take care of

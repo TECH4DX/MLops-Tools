@@ -164,4 +164,6 @@ If the commands are executed successfully, the eventbus, event-source and sensor
 
 - Before you deploy the public network service, please make sure that the firewall policy of your cloud server allows outgoing communication on the required port, such as port `2746` and `9003` .
 
-- See more technical details in the [Argo Workflows official document](https://argoproj.github.io/argo-workflows/).
+- See more technical details in the [Argo Workflows official document](https://argoproj.github.io/argo-workflows/) and [Argo Events official document](https://argoproj.github.io/argo-events/).
+
+- See more examples in [Argo Workflows Github Repository](https://github.com/argoproj/argo-workflows/tree/master/examples) and [Argo Events Github Repository](https://github.com/argoproj/argo-events/tree/master/examples).

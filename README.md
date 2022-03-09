@@ -24,7 +24,7 @@ To run Argo workflows that use artifacts, such as `Mnist` we are running, you mu
     $ kubectl create secret generic mlops-bucket-serviceaccount --from-file=serviceAccountKey=<YOUR-SERVICE-ACCOUNT-KEY-file> -n mnist-demo
     ```
 
-## Create Service Account
+## Create Service Account for Argo Workflows
 To access cluster resources, such as pods and workflows contronller, you should create a new service account with proper authorization.
 
 ```bash
@@ -67,6 +67,90 @@ Then all you have to do is set up the resources with kubectl:
 $ cd workflows
 $ kubectl apply -f ./examples/mnist-train-eval.yaml -n mnist-demo
 ```
+
+## Argo Events Install
+Argo Events is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. on events from a variety of sources like webhooks, S3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
+
+```bash
+# Create specific namespace for argo events
+$ kubectl create namespace argo-events
+
+# Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller.
+# Cluster-wide Installation
+$ kubectl apply -f events/install.yaml
+# Or Namespace Installation
+$ kubectl apply -f events/namespace-install.yaml
+```
+
+## Create Service Account for Argo Events
+To make the Sensors be able to trigger Workflows, a Service Account with RBAC settings is required (assume you run the examples in the namespace argo-events).
+
+```bash
+$ kubectl apply -f events/create-serviceaccount.yaml -n argo-events
+```
+## Webhook Example of Argo Events
+We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.
+
+- Set up the eventbus.  
+
+    ```bash
+    $ kubectl apply -f events/examples/eventbus_native.yaml -n argo-events
+    ```
+- Create the webhook event source.  
+
+    ```bash
+    $ kubectl apply -f events/examples/eventsource_webhook.yaml -n argo-events
+    ```
+- Create the webhook sensor.  
+
+    ```bash
+    $ kubectl apply -f events/examples/sensor_webhook.yaml -n argo-events
+    ```
+If the commands are executed successfully, the eventbus, event-source and sensor pods will get created. You will also notice that a service is created for the event-source.  
+
+- Use either Curl or Postman to send a post request to the http://localhost:9100/example.  
+
+    ```bash
+    $ curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:9100/example
+    ```
+- Now, you should see an Argo workflow being created.  
+
+   ```bash
+   $ kubectl get wf -n argo-events
+    ```
+
+- Make sure the workflow pod ran successfully.
+    ```bash
+     _________________________________________
+    / {"context":{"type":"webhook","specVersi \
+    | on":"0.3","source":"webhook","e |
+    | ventID":"38376665363064642d343336352d34 |
+    | 3035372d393766662d366234326130656232343 |
+    | 337","time":"2020-01-11T16:55:42.996636 |
+    | Z","dataContentType":"application/json" |
+    | ,"subject":"example"},"data":"eyJoZWFkZ |
+    | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
+    | LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |
+    | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
+    | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
+    | jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |
+    \ IHdlYmhvb2sifX0="}                      /
+    -----------------------------------------
+        \
+        \
+        \
+                        ##        .
+                ## ## ##       ==
+            ## ## ## ##      ===
+        /""""""""""""""""___/ ===
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+        \______ o          __/
+            \    \        __/
+            \____\______/
+    ```
+
+**Note:** You will see the message printed in the workflow logs contains both the event context and data, with data being base64 encoded.
+
 
 ## Few things to take care of
 - The current default setting of Argo needs to use the token to login, you may need to generate a token with shell script we provided:

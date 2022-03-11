@@ -1,0 +1,159 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: webhook-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: mnist-
+              spec:
+                entrypoint: mnist-controller
+                serviceAccountName: operate-workflow-sa
+                onExit: delete
+                arguments:
+                  parameters:
+                  - name: message
+                    # the value will get overridden by event payload from test-dep
+                    value: hello world
+                templates:
+                - name: whalesay
+                  inputs:
+                    parameters:
+                    - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}}"]
+
+                - name: mnist-controller
+                  inputs:
+                      parameters:
+                      - name: message
+                  steps:
+                  - - name: mnist-train
+                      template: train
+                  - - name: mnist-eval
+                      template: eval
+                      arguments:
+                        artifacts:
+                        - name: model-path
+                          from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
+                    - name: mnist-serving
+                      template: server
+                      arguments:
+                        artifacts:
+                        - name: model-path
+                          from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
+                    - name: mnist-web
+                      template: create-service
+
+                - name: train
+                  container:
+                    image: guoqiangqi/mnist-example:v1.0
+                    imagePullPolicy: Always
+                    env:
+                    - name: IS_TRAIN
+                      value: "True"
+                    - name: NUM_STEPS
+                      value: "10"
+                    command: ['python3']
+                    args: ["mnist_train_eval.py"]
+                  outputs:
+                    artifacts:
+                    - name: model-saved
+                      path: /mnist-example/ckpt
+                      gcs:
+                        bucket: mlops-example-bucket
+                        key: mnist-example-models-demo
+                        serviceAccountKeySecret:
+                          name: mlops-bucket-serviceaccount
+                          key: serviceAccountKey
+
+                - name: eval
+                  inputs:
+                    artifacts:
+                    - name: model-path
+                      path: /mnist-example/ckpt
+                  container:
+                    image: guoqiangqi/mnist-example:v1.0
+                    imagePullPolicy: Always
+                    env:
+                    - name: IS_TRAIN
+                      value: "False"
+                    command: ['python3']
+                    args: ["mnist_train_eval.py"]
+
+                - name: server
+                  inputs:
+                    artifacts:
+                    - name: model-path
+                      path: /mnist-serving/mnist/data/ckpt
+                  container:
+                    image: guoqiangqi/mnist-serving:v1.0
+                    imagePullPolicy: Always
+                    ports:
+                    - containerPort: 9003
+                    command: ['python3']
+                    args: ["main.py"]
+                  metadata:
+                    labels:
+                      app: mnist-web
+
+                - name: create-service
+                  resource:
+                      action: create
+                      manifest: |
+                        apiVersion: v1
+                        kind: Service
+                        metadata:
+                          name: mnist-web
+                          labels:
+                            app: mnist-web
+                        spec:
+                          ports:
+                            - port: 9003
+                              targetPort: 9003
+                              nodePort: 9004
+                              protocol: TCP
+                          type: NodePort
+                          selector:
+                            app: mnist-web
+
+                - name: delete
+                  resource:
+                      action: delete
+                      manifest: |
+                        apiVersion: v1
+                        kind: Service
+                        metadata:
+                          name: mnist-web
+                          labels:
+                            app: mnist-web
+                        spec:
+                          ports:
+                            - port: 9003
+                              targetPort: 9003
+                              nodePort: 9004
+                              protocol: TCP
+                          type: NodePort
+                          selector:
+                            app: mnist-web
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.message
+              dest: spec.arguments.parameters.0.value

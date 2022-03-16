@@ -31,12 +31,18 @@ spec:
                     value: image-default
                   - name: image-version
                     value: v0.0
+                  - name: dockerhub-username
+                    value: xx
+                  - name: dockerhub-password
+                    vaule: xx
                 templates:
                 - name: mnist-controller
                   inputs:
                     parameters:
                     - name: image-name
                     - name: image-version
+                    - name: dockerhub-username
+                    - name: dockerhub-password
                   steps:
                   - - name: image-build
                       template: build
@@ -46,6 +52,10 @@ spec:
                           value: "{{inputs.parameters.image-name}}"
                         - name: image-version
                           value: "{{inputs.parameters.image-version}}"
+                        - name: dockerhub-username
+                          value: "{{inputs.parameters.dockerhub-username}}"
+                        - name: dockerhub-password
+                          value: "{{inputs.parameters.dockerhub-password}}"
                   - - name: mnist-train
                       template: train
                   - - name: mnist-eval
@@ -68,6 +78,8 @@ spec:
                     parameters:
                       - name: image-name
                       - name: image-version
+                      - name: dockerhub-username
+                      - name: dockerhub-password
                   script:
                     image: docker:latest
                     imagePullPolicy: Always
@@ -77,9 +89,13 @@ spec:
                     - name: IMAGE-VERSION
                       value: "{{inputs.parameters.image-version}}"
                     command: ["/bin/sh"]
+                    - name: USERNAME
+                      value: "{{inputs.parameters.dockerhub-username}}"
+                    - name: PASSWD
+                      value: "{{inputs.parameters.dockerhub-password}}"
                     #args: ["{{inputs.parameters.image-name}}"]
                     source: |
-                      docker login --username=xxx --password=xxx
+                      docker login --username=${USERNAME} --password=${PASSWD}
                       docker build -t guoqiangqi/auto-build:v1.0 https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
                       docker push guoqiangqi/auto-build:v1.0
 
@@ -192,3 +208,11 @@ spec:
                 dependencyName: test-dep
                 dataKey: body.config.image-version
               dest: spec.arguments.parameters.1.value
+            - src:
+              dependencyName: test-dep
+              dataKey: body.config.dockerhub-username
+            dest: spec.arguments.parameters.2.value
+            - src:
+                dependencyName: test-dep
+                dataKey: body.config.dockerhub-password
+              dest: spec.arguments.parameters.3.value

@@ -68,16 +68,25 @@ spec:
                     parameters:
                       - name: image-name
                       - name: image-version
-                  container:
-                    image: docker/whalesay:latest
+                  script:
+                    image: docker:latest
                     imagePullPolicy: Always
                     env:
                     - name: IMAGE-NAME
                       value: "{{inputs.parameters.image-name}}"
                     - name: IMAGE-VERSION
                       value: "{{inputs.parameters.image-version}}"
-                    command: [cowsay]
-                    args: ["{{inputs.parameters.image-name}}"]
+                    command: ["/bin/sh"]
+                    #args: ["{{inputs.parameters.image-name}}"]
+                    source: |
+                      docker login --username=xxx --password=xxx
+                      docker build -t guoqiangqi/auto-build:v1.0 https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
+                      docker push guoqiangqi/auto-build:v1.0
+
+                    volumeMounts:
+                      - name: docker-sock
+                        readOnly: true
+                        mountPath: /var/run/docker.sock
 
                 - name: train
                   container:
@@ -170,6 +179,10 @@ spec:
                           type: NodePort
                           selector:
                             app: mnist-web
+                volumes:
+                  - name: docker-sock
+                    hostPath:
+                      path: /var/run/docker.sock
           parameters:
             - src:
                 dependencyName: test-dep

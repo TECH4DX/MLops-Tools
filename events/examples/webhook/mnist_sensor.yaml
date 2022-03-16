@@ -88,11 +88,11 @@ spec:
                       value: "{{inputs.parameters.image-name}}"
                     - name: IMAGE-VERSION
                       value: "{{inputs.parameters.image-version}}"
-                    command: ["/bin/sh"]
                     - name: USERNAME
                       value: "{{inputs.parameters.dockerhub-username}}"
                     - name: PASSWD
                       value: "{{inputs.parameters.dockerhub-password}}"
+                    command: ["/bin/sh"]
                     #args: ["{{inputs.parameters.image-name}}"]
                     source: |
                       docker login --username=${USERNAME} --password=${PASSWD}
@@ -209,9 +209,9 @@ spec:
                 dataKey: body.config.image-version
               dest: spec.arguments.parameters.1.value
             - src:
-              dependencyName: test-dep
-              dataKey: body.config.dockerhub-username
-            dest: spec.arguments.parameters.2.value
+                dependencyName: test-dep
+                dataKey: body.config.dockerhub-username
+              dest: spec.arguments.parameters.2.value
             - src:
                 dependencyName: test-dep
                 dataKey: body.config.dockerhub-password

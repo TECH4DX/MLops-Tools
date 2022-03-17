@@ -94,9 +94,9 @@ spec:
                     image: docker:latest
                     imagePullPolicy: Always
                     env:
-                    - name: TRAIN-IMAGE
+                    - name: TRAIN
                       value: "{{inputs.parameters.train-image}}"
-                    - name: SERVING-IMAGE
+                    - name: SERVING
                       value: "{{inputs.parameters.serving-image}}"
                     - name: USERNAME
                       value: "{{inputs.parameters.dockerhub-username}}"
@@ -106,11 +106,11 @@ spec:
                     #args: ["{{inputs.parameters.image-name}}"]
                     source: |
                       docker login --username=${USERNAME} --password=${PASSWD}
-                      echo ${TRAIN-IMAGE} ${SERVING-IMAGE}
-                      docker build -t ${TRAIN-IMAGE} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
-                      docker push ${TRAIN-IMAGE}
-                      docker build -t ${SERVING-IMAGE} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist-serving/docker/Dockerfile
-                      docker push ${SERVING-IMAGE}
+                      echo ${TRAIN} ${SERVING}
+                      docker build -t ${TRAIN} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
+                      docker push ${TRAIN}
+                      docker build -t ${SERVING} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist-serving/docker/Dockerfile
+                      docker push ${SERVING}
 
                     volumeMounts:
                       - name: docker-sock

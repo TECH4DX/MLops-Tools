@@ -138,6 +138,21 @@ If the commands are executed successfully, the eventbus, event-source and sensor
             \____\______/
     ```
 
+## Argo CD Install
+We will create a new namespace, argocd, where Argo CD services and application resources will live.
+```bash
+$ kubectl create namespace argocd
+$ kubectl apply -f cd/install.yaml -n argocd
+```
+
+## Login via UI
+The initial password for the `admin` account is auto-generated and stored as clear text in the field `password` in a secret named `argocd-initial-admin-secret` in your Argo CD installation namespace. You can simply retrieve this password using `kubectl`:
+```bash
+$ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+Open a browser to the Argo CD external UI, and login by visiting the IP/hostname(*https://MASTER_NODE_IP:2747*) in a browser.
+
 
 ## Few things to take care of
 - The current default setting of Argo needs to use the token to login, you may need to generate a token with shell script we provided:

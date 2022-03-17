@@ -35,6 +35,8 @@ spec:
                     value: guoqiangqi
                   - name: dockerhub-password
                     vaule: xxxxxx
+                  - name: train-steps
+                    vaule: 10
                 templates:
                 - name: mnist-controller
                   inputs:
@@ -43,6 +45,7 @@ spec:
                     - name: serving-image-fullname
                     - name: dockerhub-username
                     - name: dockerhub-password
+                    - name: train-steps
                   steps:
                   - - name: image-build
                       template: build
@@ -62,6 +65,8 @@ spec:
                         parameters:
                         - name: train-image
                           value: "{{inputs.parameters.train-image-fullname}}"
+                        - name: train-steps
+                          value: "{{inputs.parameters.train-steps}}"
                   - - name: mnist-eval
                       template: eval
                       arguments:
@@ -121,6 +126,7 @@ spec:
                   inputs:
                     parameters:
                       - name: train-image
+                      - name: train-steps
                   container:
                     image: "{{inputs.parameters.train-image}}"
                     imagePullPolicy: Always
@@ -128,7 +134,7 @@ spec:
                     - name: IS_TRAIN
                       value: "True"
                     - name: NUM_STEPS
-                      value: "10"
+                      value: "{{inputs.parameters.train-steps}}"
                     command: ['python3']
                     args: ["mnist_train_eval.py"]
                   outputs:
@@ -236,3 +242,7 @@ spec:
                 dependencyName: test-dep
                 dataKey: body.config.dockerhub-password
               dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: test-dep
+                dataKey: body.config.train-steps
+              dest: spec.arguments.parameters.4.value

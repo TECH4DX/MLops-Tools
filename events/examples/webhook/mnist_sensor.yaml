@@ -106,6 +106,7 @@ spec:
                     #args: ["{{inputs.parameters.image-name}}"]
                     source: |
                       docker login --username=${USERNAME} --password=${PASSWD}
+                      echo ${TRAIN-IMAGE} ${SERVING-IMAGE}
                       docker build -t ${TRAIN-IMAGE} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
                       docker push ${TRAIN-IMAGE}
                       docker build -t ${SERVING-IMAGE} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist-serving/docker/Dockerfile

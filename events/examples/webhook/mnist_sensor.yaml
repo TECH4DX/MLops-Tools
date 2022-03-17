@@ -26,21 +26,21 @@ spec:
                 onExit: delete
                 arguments:
                   parameters:
-                  - name: image-name
+                  - name: train-image-fullname
                     # the value will get overridden by event payload from test-dep
-                    value: image-default
-                  - name: image-version
-                    value: v0.0
+                    value: guoqiangqi/mnist-train:v1.0
+                  - name: serving-image-fullname
+                    value: guoqiangqi/mnist-serving:v1.0
                   - name: dockerhub-username
-                    value: xx
+                    value: guoqiangqi
                   - name: dockerhub-password
-                    vaule: xx
+                    vaule: xxxxxx
                 templates:
                 - name: mnist-controller
                   inputs:
                     parameters:
-                    - name: image-name
-                    - name: image-version
+                    - name: train-image-fullname
+                    - name: serving-image-fullname
                     - name: dockerhub-username
                     - name: dockerhub-password
                   steps:
@@ -48,25 +48,35 @@ spec:
                       template: build
                       arguments:
                         parameters:
-                        - name: image-name
-                          value: "{{inputs.parameters.image-name}}"
-                        - name: image-version
-                          value: "{{inputs.parameters.image-version}}"
+                        - name: train-image
+                          value: "{{inputs.parameters.train-image-fullname}}"
+                        - name: serving-image
+                          value: "{{inputs.parameters.serving-image-fullname}}"
                         - name: dockerhub-username
                           value: "{{inputs.parameters.dockerhub-username}}"
                         - name: dockerhub-password
                           value: "{{inputs.parameters.dockerhub-password}}"
                   - - name: mnist-train
                       template: train
+                      arguments:
+                        parameters:
+                        - name: train-image
+                          value: "{{inputs.parameters.train-image-fullname}}"
                   - - name: mnist-eval
                       template: eval
                       arguments:
+                        parameters:
+                        - name: eval-image
+                          value: "{{inputs.parameters.train-image-fullname}}"
                         artifacts:
                         - name: model-path
                           from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
                     - name: mnist-serving
                       template: server
                       arguments:
+                        parameters:
+                        - name: serving-image
+                          value: "{{inputs.parameters.serving-image-fullname}}"
                         artifacts:
                         - name: model-path
                           from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
@@ -76,18 +86,18 @@ spec:
                 - name: build
                   inputs:
                     parameters:
-                      - name: image-name
-                      - name: image-version
+                      - name: train-image
+                      - name: serving-image
                       - name: dockerhub-username
                       - name: dockerhub-password
                   script:
                     image: docker:latest
                     imagePullPolicy: Always
                     env:
-                    - name: IMAGE-NAME
-                      value: "{{inputs.parameters.image-name}}"
-                    - name: IMAGE-VERSION
-                      value: "{{inputs.parameters.image-version}}"
+                    - name: TRAIN-IMAGE
+                      value: "{{inputs.parameters.train-image}}"
+                    - name: SERVING-IMAGE
+                      value: "{{inputs.parameters.serving-image}}"
                     - name: USERNAME
                       value: "{{inputs.parameters.dockerhub-username}}"
                     - name: PASSWD
@@ -96,8 +106,10 @@ spec:
                     #args: ["{{inputs.parameters.image-name}}"]
                     source: |
                       docker login --username=${USERNAME} --password=${PASSWD}
-                      docker build -t guoqiangqi/auto-build:v1.0 https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
-                      docker push guoqiangqi/auto-build:v1.0
+                      docker build -t ${TRAIN-IMAGE} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist/docker/Dockerfile
+                      docker push ${TRAIN-IMAGE}
+                      docker build -t ${SERVING-IMAGE} https://github.com/TECH4DX/MLops-Tools/raw/main/mnist-serving/docker/Dockerfile
+                      docker push ${SERVING-IMAGE}
 
                     volumeMounts:
                       - name: docker-sock
@@ -105,8 +117,11 @@ spec:
                         mountPath: /var/run/docker.sock
 
                 - name: train
+                  inputs:
+                    parameters:
+                      - name: train-image
                   container:
-                    image: guoqiangqi/mnist-example:v1.0
+                    image: "{{inputs.parameters.train-image}}"
                     imagePullPolicy: Always
                     env:
                     - name: IS_TRAIN
@@ -128,11 +143,13 @@ spec:
 
                 - name: eval
                   inputs:
+                    parameters:
+                      - name: eval-image
                     artifacts:
                     - name: model-path
                       path: /mnist-example/ckpt
                   container:
-                    image: guoqiangqi/mnist-example:v1.0
+                    image: "{{inputs.parameters.eval-image}}"
                     imagePullPolicy: Always
                     env:
                     - name: IS_TRAIN
@@ -142,11 +159,13 @@ spec:
 
                 - name: server
                   inputs:
+                    parameters:
+                      - name: serving-image
                     artifacts:
                     - name: model-path
                       path: /mnist-serving/mnist/data/ckpt
                   container:
-                    image: guoqiangqi/mnist-serving:v1.0
+                    image: "{{inputs.parameters.serving-image}}"
                     imagePullPolicy: Always
                     ports:
                     - containerPort: 9003
@@ -202,11 +221,11 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                dataKey: body.config.image-name
+                dataKey: body.config.train-image-fullname
               dest: spec.arguments.parameters.0.value
             - src:
                 dependencyName: test-dep
-                dataKey: body.config.image-version
+                dataKey: body.config.serving-image-fullname
               dest: spec.arguments.parameters.1.value
             - src:
                 dependencyName: test-dep

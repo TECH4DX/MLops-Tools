@@ -2,6 +2,7 @@
 
 
 ## **Workflows**
+Workflows is a container-native workflow engine for orchestrating parallel jobs on Kubernetes.We build it on top of Argo Workflows, which is implemented as a Kubernetes CRD (Custom Resource Definition).
 ## Argo Workflow Install
 You need to configure the ArgoWorkflow environment before deploy your own workflows. Fortunately, it is extremely convenient to install ArgoWorkflow based on the cloud-native k8s environment. Make sure you have `kubectl` configured correctly on your machine, use `kubectl apply` command with installation yaml file in `workflows/` folder to install Argo:
 
@@ -73,6 +74,8 @@ $ kubectl apply -f ./examples/mnist-train-eval.yaml -n mnist-demo
 **NOTE:** Once all three steps in workflow `mnist-train-eval` passed, you can visit the mnist website with url `https://MASTER_NODE_IP:9003` . Draw a digit and test it.
 
 ## **Events**
+Events is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. on events from a variety of sources like webhooks, S3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
+
 ## Argo Events Install
 Argo Events is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. on events from a variety of sources like webhooks, S3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
 
@@ -143,6 +146,7 @@ If the commands are executed successfully, the eventbus, event-source and sensor
     ```
 
 ## **CD**
+We build CD on top of ArgoCD, which is a declarative, GitOps continuous delivery tool for Kubernetes.
 ## Argo CD Install
 We will create a new namespace, argocd, where Argo CD services and application resources will live.
 ```bash

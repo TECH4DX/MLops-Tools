@@ -1,5 +1,7 @@
 # MLops platform installation guide
 
+
+## **Workflows**
 ## Argo Workflow Install
 You need to configure the ArgoWorkflow environment before deploy your own workflows. Fortunately, it is extremely convenient to install ArgoWorkflow based on the cloud-native k8s environment. Make sure you have `kubectl` configured correctly on your machine, use `kubectl apply` command with installation yaml file in `workflows/` folder to install Argo:
 
@@ -31,8 +33,9 @@ To access cluster resources, such as pods and workflows contronller, you should 
 $ kubectl create -f workflows/create-serviceaccounts.yaml -n mnist-demo
 ```
 
-## Build the docker images
+## Mnist Example (Optional)
 
+### **Build Images**
 All scripts used for Mnist model training and evaling are in the `mnist/` folder, use `docker build` command to build and tag the image:
 
 ```bash
@@ -51,7 +54,7 @@ $ docker push $DOCKER_REGISTRY/$MY_ORG/mnist-serving:$TAG
 Feel free to choose your favorite docker registry(dockerhub, huaweicloud swr...) and create the organization. You may need to login the registry before pushing.
 
 
-## Replace the image values
+### **Replace the image values**
 After building and pushing the images, specify the image url in the corresponding yaml file, `mnist-train-eval.yaml` in this demo.
 
 ```bash 
@@ -60,7 +63,7 @@ $ vim examples/mnist-train-eval.yaml
 # Update the value of 'image' field to your own docker registry url
 ```
 
-## Setup Mnist workflow
+### **Setup Mnist workflow**
 Then all you have to do is set up the resources with kubectl:
 ```bash
 # Setup Mnist workflow:
@@ -69,6 +72,7 @@ $ kubectl apply -f ./examples/mnist-train-eval.yaml -n mnist-demo
 ```
 **NOTE:** Once all three steps in workflow `mnist-train-eval` passed, you can visit the mnist website with url `https://MASTER_NODE_IP:9003` . Draw a digit and test it.
 
+## **Events**
 ## Argo Events Install
 Argo Events is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. on events from a variety of sources like webhooks, S3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
 
@@ -89,7 +93,7 @@ To make the Sensors be able to trigger Workflows, a Service Account with RBAC se
 ```bash
 $ kubectl apply -f events/create-serviceaccount.yaml -n argo-events
 ```
-## Webhook Example of Argo Events
+## Webhook Example of Argo Events (Optional)
 We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.
 
 - Set up the eventbus.  
@@ -138,6 +142,7 @@ If the commands are executed successfully, the eventbus, event-source and sensor
             \____\______/
     ```
 
+## **CD**
 ## Argo CD Install
 We will create a new namespace, argocd, where Argo CD services and application resources will live.
 ```bash

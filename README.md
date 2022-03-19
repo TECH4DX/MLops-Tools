@@ -1,5 +1,6 @@
 # MLops platform installation guide
 
+![img](./materials/images/Architecture01.png)
 
 ## **Workflows**
 Workflows is a container-native workflow engine for orchestrating parallel jobs on Kubernetes.We build it on top of Argo Workflows, which is implemented as a Kubernetes CRD (Custom Resource Definition).

@@ -189,5 +189,5 @@ etcd-0               Healthy   {"health":"true"}
 - 客户端挂载共享文件系统
     ```bash
     # nfs-share 共享文件系统挂载到 /mnt
-    $ sudo mount localhost:/home/user/nfs-share /mnt
+    $ sudo mount nfs-server-ip:/home/user/nfs-share /mnt
     ```

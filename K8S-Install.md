@@ -118,3 +118,35 @@ $ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Docum
 $ kubectl get nodes
 ```
 ![k8s-node-status0](./materials/images/k8s-node-status1.png)
+
+## Fix Unhealthy status
+部署完集群后，执行`kubectl get cs`命令来检测组件的运行状态时，可能会报以下错误：
+```bash
+$ kubectl get cs
+Warning: v1 ComponentStatus is deprecated in v1.19+
+NAME                 STATUS      MESSAGE                                                                                       ERROR
+scheduler            Unhealthy   Get "http://127.0.0.1:10251/healthz": dial tcp 127.0.0.1:10251: connect: connection refused  
+controller-manager   Unhealthy   Get "http://127.0.0.1:10252/healthz": dial tcp 127.0.0.1:10252: connect: connection refused  
+etcd-0               Healthy     {"health":"true"}                                                                            
+$ wget http://127.0.0.1:10251/healthz
+--2020-11-14 00:10:51--  http://127.0.0.1:10251/healthz
+Connecting to 127.0.0.1:10251... failed: Connection refused.
+```
+出现这种情况，是`/etc/kubernetes/manifests/`下的`kube-controller-manager.yaml`和`kube-scheduler.yaml`设置的默认端口是0导致的，需要用#注释掉相应文件中的`-–port=0`:
+```bash
+# 1. kube-controller-manager.yaml文件修改：注释掉27行
+# 2. kube-scheduler.yaml配置修改：注释掉19行,- --port=0
+```
+在master节点重启`kubelet`:
+```bash
+$ systemctl restart kubelet.service
+```
+重新查看已正常:
+```bash
+$ kubectl get cs
+Warning: v1 ComponentStatus is deprecated in v1.19+
+NAME                 STATUS    MESSAGE             ERROR
+scheduler            Healthy   ok                 
+controller-manager   Healthy   ok                 
+etcd-0               Healthy   {"health":"true"}  
+```

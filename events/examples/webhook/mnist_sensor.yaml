@@ -196,7 +196,7 @@ spec:
                           ports:
                             - port: 9003
                               targetPort: 9003
-                              nodePort: 9004
+                              nodePort: 9103
                               protocol: TCP
                           type: NodePort
                           selector:
@@ -216,7 +216,7 @@ spec:
                           ports:
                             - port: 9003
                               targetPort: 9003
-                              nodePort: 9004
+                              nodePort: 9103
                               protocol: TCP
                           type: NodePort
                           selector:

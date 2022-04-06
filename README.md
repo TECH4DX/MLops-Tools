@@ -108,12 +108,12 @@ We are going to set up a sensor and event-source for webhook. The goal is to tri
 - Create the webhook event source.  
 
     ```bash
-    $ kubectl apply -f events/examples/eventsource_webhook.yaml -n argo-events
+    $ kubectl apply -f events/examples/webhook/eventsource_webhook.yaml -n argo-events
     ```
 - Create the webhook sensor.  
 
     ```bash
-    $ kubectl apply -f events/examples/sensor_webhook.yaml -n argo-events
+    $ kubectl apply -f events/examples/webhook/sensor_webhook.yaml -n argo-events
     ```
 If the commands are executed successfully, the eventbus, event-source and sensor pods will get created. You will also notice that a service is created for the event-source.  
 

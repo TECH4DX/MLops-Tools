@@ -16,7 +16,9 @@ $ kubectl apply -f workflows/install.yaml -n argo
 
 **Optional:** Download the latest Argo CLI from official [releases page](https://github.com/argoproj/argo-workflows/releases/latest) which includes the guide on setting up.
 
-## Configure Artifact Repository
+## Mnist Example (Optional)
+
+### **Configure Artifact Repository**
 To run Argo workflows that use artifacts, such as `Mnist` we are running, you must configure and use an artifact repository. Argo supports any S3 compatible artifact repository such as AWS, GCS ( Google Cloud Storage ) and Minio. We all used `GCS` in our examples:
 1. Create a bucket and name it `mlops-example-bucket` from the GCP Console (https://console.cloud.google.com/storage/browser).  
 
@@ -28,14 +30,12 @@ To run Argo workflows that use artifacts, such as `Mnist` we are running, you mu
     $ kubectl create secret generic mlops-bucket-serviceaccount --from-file=serviceAccountKey=<YOUR-SERVICE-ACCOUNT-KEY-file> -n mnist-demo
     ```
 
-## Create Service Account for Argo Workflows
+### **Create Service Account for Argo Workflows**
 To access cluster resources, such as pods and workflows contronller, you should create a new service account with proper authorization.
 
 ```bash
 $ kubectl create -f workflows/create-serviceaccounts.yaml -n mnist-demo
 ```
-
-## Mnist Example (Optional)
 
 ### **Build Images**
 All scripts used for Mnist model training and evaling are in the `mnist/` folder, use `docker build` command to build and tag the image:

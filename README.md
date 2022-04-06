@@ -41,14 +41,14 @@ $ kubectl create -f workflows/create-serviceaccounts.yaml -n mnist-demo
 All scripts used for Mnist model training and evaling are in the `mnist/` folder, use `docker build` command to build and tag the image:
 
 ```bash
-$ cd mnist/docker/
+$ cd workflows/examples/mnist/docker/
 $ docker build -t $DOCKER_REGISTRY/$MY_ORG/mnist-example:$TAG ./
 $ docker push $DOCKER_REGISTRY/$MY_ORG/mnist-example:$TAG
 ```
 
 Scripts used for Mnist serving are in the `mnist-serving` folder:
 ```bash
-$ cd mnist-serving/docker/
+$ cd workflows/examples/mnist-serving/docker/
 $ docker build -t $DOCKER_REGISTRY/$MY_ORG/mnist-serving:$TAG ./
 $ docker push $DOCKER_REGISTRY/$MY_ORG/mnist-serving:$TAG
 ```

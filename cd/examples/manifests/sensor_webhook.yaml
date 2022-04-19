@@ -1,0 +1,271 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: webhook-dep
+      eventSourceName: webhook
+      eventName: eventsource-webhook
+  triggers:
+    - template:
+        name: webhook-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: mnist-
+              spec:
+                entrypoint: mnist-controller
+                serviceAccountName: operate-workflow-sa
+                # onExit: wf-exit-handler
+                arguments:
+                  parameters:
+                  - name: train-image-fullname
+                    # the value will get overridden by event payload from test-dep
+                    value: guoqiangqi/mnist-train:v1.0
+                  - name: serving-image-fullname
+                    value: guoqiangqi/mnist-serving:v1.0
+                  - name: dockerhub-username
+                    value: guoqiangqi
+                  - name: dockerhub-password
+                    vaule: xxxxxx
+                  - name: train-steps
+                    vaule: 10
+                  - name: serving-port
+                    value: 9100
+                templates:
+                - name: mnist-controller
+                  inputs:
+                    parameters:
+                    - name: train-image-fullname
+                    - name: serving-image-fullname
+                    - name: dockerhub-username
+                    - name: dockerhub-password
+                    - name: train-steps
+                    - name: serving-port
+                  steps:
+                  - - name: image-build
+                      template: build
+                      arguments:
+                        parameters:
+                        - name: train-image
+                          value: "{{inputs.parameters.train-image-fullname}}"
+                        - name: serving-image
+                          value: "{{inputs.parameters.serving-image-fullname}}"
+                        - name: dockerhub-username
+                          value: "{{inputs.parameters.dockerhub-username}}"
+                        - name: dockerhub-password
+                          value: "{{inputs.parameters.dockerhub-password}}"
+                  - - name: mnist-train
+                      template: train
+                      arguments:
+                        parameters:
+                        - name: train-image
+                          value: "{{inputs.parameters.train-image-fullname}}"
+                        - name: train-steps
+                          value: "{{inputs.parameters.train-steps}}"
+                  - - name: mnist-eval
+                      template: eval
+                      arguments:
+                        parameters:
+                        - name: eval-image
+                          value: "{{inputs.parameters.train-image-fullname}}"
+                        artifacts:
+                        - name: model-path
+                          from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
+                    - name: mnist-serving
+                      template: server
+                      hooks:
+                        exit:
+                          template: delete-service
+                          arguments:
+                            parameters:
+                              - name: serving-port
+                                value: "{{inputs.parameters.serving-port}}"
+                      arguments:
+                        parameters:
+                        - name: serving-image
+                          value: "{{inputs.parameters.serving-image-fullname}}"
+                        - name: serving-port
+                          value: "{{inputs.parameters.serving-port}}"
+                        artifacts:
+                        - name: model-path
+                          from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
+                    - name: mnist-web
+                      template: create-service
+                      arguments:
+                        parameters:
+                        - name: serving-port
+                          value: "{{inputs.parameters.serving-port}}"
+
+                - name: build
+                  inputs:
+                    parameters:
+                      - name: train-image
+                      - name: serving-image
+                      - name: dockerhub-username
+                      - name: dockerhub-password
+                  script:
+                    image: docker:latest
+                    imagePullPolicy: Always
+                    env:
+                    - name: TRAIN
+                      value: "{{inputs.parameters.train-image}}"
+                    - name: SERVING
+                      value: "{{inputs.parameters.serving-image}}"
+                    - name: USERNAME
+                      value: "{{inputs.parameters.dockerhub-username}}"
+                    - name: PASSWD
+                      value: "{{inputs.parameters.dockerhub-password}}"
+                    command: ["/bin/sh"]
+                    #args: ["{{inputs.parameters.image-name}}"]
+                    source: |
+                      docker login --username=${USERNAME} --password=${PASSWD}
+                      echo ${TRAIN} ${SERVING}
+                      docker build -t ${TRAIN} https://github.com/TECH4DX/MLops-Tools/raw/main/workflows/examples/mnist/docker/Dockerfile
+                      docker push ${TRAIN}
+                      docker build -t ${SERVING} https://github.com/TECH4DX/MLops-Tools/raw/main/workflows/examples/mnist-serving/docker/Dockerfile
+                      docker push ${SERVING}
+
+                    volumeMounts:
+                      - name: docker-sock
+                        readOnly: true
+                        mountPath: /var/run/docker.sock
+
+                - name: train
+                  inputs:
+                    parameters:
+                      - name: train-image
+                      - name: train-steps
+                  container:
+                    image: "{{inputs.parameters.train-image}}"
+                    imagePullPolicy: Always
+                    env:
+                    - name: IS_TRAIN
+                      value: "True"
+                    - name: NUM_STEPS
+                      value: "{{inputs.parameters.train-steps}}"
+                    command: ['python3']
+                    args: ["mnist_train_eval.py"]
+                  outputs:
+                    artifacts:
+                    - name: model-saved
+                      path: /mnist-example/ckpt
+                      gcs:
+                        bucket: mlops-example-bucket
+                        key: mnist-example-models-demo
+                        serviceAccountKeySecret:
+                          name: mlops-bucket-serviceaccount
+                          key: serviceAccountKey
+
+                - name: eval
+                  inputs:
+                    parameters:
+                      - name: eval-image
+                    artifacts:
+                    - name: model-path
+                      path: /mnist-example/ckpt
+                  container:
+                    image: "{{inputs.parameters.eval-image}}"
+                    imagePullPolicy: Always
+                    env:
+                    - name: IS_TRAIN
+                      value: "False"
+                    command: ['python3']
+                    args: ["mnist_train_eval.py"]
+
+                - name: server
+                  inputs:
+                    parameters:
+                      - name: serving-image
+                      - name: serving-port
+                    artifacts:
+                    - name: model-path
+                      path: /mnist-serving/mnist/data/ckpt
+                  container:
+                    image: "{{inputs.parameters.serving-image}}"
+                    imagePullPolicy: Always
+                    ports:
+                    - containerPort: 9003
+                    command: ['python3']
+                    args: ["main.py"]
+                  metadata:
+                    labels:
+                      app: mnist-web-{{inputs.parameters.serving-port}}
+
+                - name: create-service
+                  inputs:
+                    parameters:
+                      - name: serving-port
+                  resource:
+                      action: create
+                      manifest: |
+                        apiVersion: v1
+                        kind: Service
+                        metadata:
+                          name: mnist-web-{{inputs.parameters.serving-port}}
+                          labels:
+                            app: mnist-web
+                        spec:
+                          ports:
+                            - port: 9003
+                              targetPort: 9003
+                              nodePort: {{inputs.parameters.serving-port}}
+                              protocol: TCP
+                          type: NodePort
+                          selector:
+                            app: mnist-web-{{inputs.parameters.serving-port}}
+
+                - name: delete-service
+                  inputs:
+                    parameters:
+                      - name: serving-port
+                  resource:
+                      action: delete
+                      manifest: |
+                        apiVersion: v1
+                        kind: Service
+                        metadata:
+                          name: mnist-web-{{inputs.parameters.serving-port}}
+
+                # Workflows exit handler template
+                # - name: wf-exit-handler
+                #   container:
+                #     image: image-name
+                #     imagePullPolicy: Always
+
+                volumes:
+                  - name: docker-sock
+                    hostPath:
+                      path: /var/run/docker.sock
+          parameters:
+            - src:
+                dependencyName: webhook-dep
+                dataKey: body.config.train-image-fullname
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: webhook-dep
+                dataKey: body.config.serving-image-fullname
+              dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: webhook-dep
+                dataKey: body.config.dockerhub-username
+              dest: spec.arguments.parameters.2.value
+            - src:
+                dependencyName: webhook-dep
+                dataKey: body.config.dockerhub-password
+              dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: webhook-dep
+                dataKey: body.config.train-steps
+              dest: spec.arguments.parameters.4.value
+            - src:
+                dependencyName: webhook-dep
+                dataKey: body.config.serving-port
+              dest: spec.arguments.parameters.5.value

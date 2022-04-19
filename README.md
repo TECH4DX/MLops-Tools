@@ -163,6 +163,8 @@ $ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.p
 
 Open a browser to the Argo CD external UI, and login by visiting the IP/hostname(*https://MASTER_NODE_IP:2747*) in a browser.
 
+## **MLops Example**
+You can deploy your first MLops application in just a few steps, see [cd/examples/getting-started-guide.md](./cd/examples/getting-started-guide.md)
 
 ## Few things to take care of
 - The current default setting of Argo needs to use the token to login, you may need to generate a token with shell script we provided:

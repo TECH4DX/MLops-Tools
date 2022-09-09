@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argo-server-ingress
+  namespace: argo
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  rules:
+  - host: argo.abu.pub
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argo-server
+            port:
+              name: web
+  tls:
+  - hosts:
+    - argo.abu.pub
+    secretName: argo-abu-pub-tls

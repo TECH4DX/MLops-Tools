@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: github-eventsource-ingress
+  namespace: argo-events
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  rules:
+  - host: github.webhook.abu.pub
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: github-eventsource-svc
+            port:
+              name: github
+  tls:
+  - hosts:
+    - github.webhook.abu.pub
+    secretName: github-webhook-abu-pub-tls

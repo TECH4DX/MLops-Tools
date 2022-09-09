@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+- manifest.yaml
+- Ingress.yaml
+
+patches:
+- path: ConfigMap.yaml
+  target:
+    kind: ConfigMap
+    name: argocd-cm

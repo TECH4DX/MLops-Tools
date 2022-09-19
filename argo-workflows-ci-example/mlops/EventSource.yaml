@@ -15,7 +15,7 @@ spec:
       repositories:
         - owner: abuxliu
           names:
-            - MLops-Tools
+            - mnist-serving
       webhook:
         endpoint: /push
         port: "12000"

@@ -174,7 +174,7 @@ kubectl create -f argo-events/SA.yaml
 kubectl create -n argo-events -f argo-events/webhook.yaml
 kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
 curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-kubectl -n argo-events get workflows | grep "webhook"
+kubectl -n argo-events get workflows
 ```
 
 ## Deploy MLOps
@@ -182,10 +182,15 @@ kubectl -n argo-events get workflows | grep "webhook"
 - Deploy
 
 ```shell
-kubectl create -f bootstrap/argo-events/Secret.yaml
-kubectl create -f bootstrap/argo-events/EventSource.yaml
-kubectl create -f bootstrap/argo-events/Ingress.yaml
-kubectl create -f bootstrap/argo-events/Sensor.yaml
+kubectl create -f mlops/Secret.yaml
+kubectl create -f mlops/EventSource.yaml
+kubectl create -f mlops/Ingress.yaml
+```
+
+## Other
+
+```shell
+kubectl create -f mlops/Sensor.yaml
 kubectl create -f docker-config.yaml
 kubectl -n argo create -f workflow.yml
 kubectl -n argocd delete application final-application

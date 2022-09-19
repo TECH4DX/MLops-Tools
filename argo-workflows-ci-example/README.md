@@ -101,6 +101,9 @@ kubectl -n argo rollout status deployment/argo-server
 - Deploy
 
 ```shell
+kubectl delete sc local-path
+apt update
+apt install nfs-common -y
 kubectl create -f applications/nfs-server-provisioner.yml
 ```
 
@@ -122,6 +125,19 @@ kubectl create -f applications/postgresql.yml
 
 ```shell
 kubectl -n postgresql rollout status statefulset/postgresql-postgresql
+```
+
+- Create Databse
+
+```shell
+# postgresql.postgresql.svc.cluster.local - Read/Write connection
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace postgresql postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace postgresql --image docker.io/bitnami/postgresql:11.14.0-debian-10-r28 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgresql -U postgres -d postgres -p 5432
+# create database registry;
+# create database notary_signer;
+# create database notary_server;
+# \l
+echo ${POSTGRES_PASSWORD}
 ```
 
 ## Deploy Harbor

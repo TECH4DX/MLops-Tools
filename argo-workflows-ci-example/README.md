@@ -110,6 +110,34 @@ kubectl create -f applications/nfs-server-provisioner.yml
 kubectl -n nfs-server-provisioner rollout status statefulset/nfs-server-provisioner
 ```
 
+## Deploy Postgres
+
+- Deploy
+
+```shell
+kubectl create -f applications/postgresql.yml
+```
+
+- Check
+
+```shell
+kubectl -n postgresql rollout status statefulset/postgresql-postgresql
+```
+
+## Deploy Harbor
+
+- Deploy
+
+```shell
+
+```
+
+- Check
+
+```shell
+
+```
+
 ## Other
 
 ```shell

@@ -10,7 +10,7 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: github.webhook.abu.pub
+  - host: github.test.abu.pub
     http:
       paths:
       - path: /
@@ -22,5 +22,5 @@ spec:
               name: github
   tls:
   - hosts:
-    - github.webhook.abu.pub
-    secretName: github-webhook-abu-pub-tls
+    - github.test.abu.pub
+    secretName: github-test-abu-pub-tls

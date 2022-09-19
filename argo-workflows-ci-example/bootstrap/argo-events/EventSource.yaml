@@ -20,7 +20,7 @@ spec:
         endpoint: /push
         port: "12000"
         method: POST
-        url: https://github.webhook.abu.pub
+        url: https://github.test.abu.pub
       events:
         - "push"
       apiToken:

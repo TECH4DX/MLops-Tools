@@ -2,18 +2,17 @@
 
 ## Env
 
-- 10.95.160.8 is your server's ip
+- 10.95.160.9 is your server's ip
 
 - *.test.abu.pub is your managed domain
 
 ## Deploy Kubernetes
 
 ```shell
-# 
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address 10.95.160.8 --node-external-ip 10.95.160.8
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address 10.95.160.9 --node-external-ip 10.95.160.9
 mkdir /root/.kube/
 ln -sf /etc/rancher/k3s/k3s.yaml /root/.kube/config
-kubectl config set-cluster default --server=https://10.95.160.8:6443
+kubectl config set-cluster default --server=https://10.95.160.9:6443
 ```
 
 ## Deploy cert-manager
@@ -130,7 +129,6 @@ kubectl -n postgresql rollout status statefulset/postgresql-postgresql
 - Create Databse
 
 ```shell
-# postgresql.postgresql.svc.cluster.local - Read/Write connection
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace postgresql postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace postgresql --image docker.io/bitnami/postgresql:11.14.0-debian-10-r28 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgresql -U postgres -d postgres -p 5432
 create database registry;
@@ -155,45 +153,50 @@ kubectl create -f applications/harbor.yml
 kubectl -n harbor rollout status deployment harbor-core
 ```
 
-## Other
+## Deploy Argo Events
+
+- Deploy
 
 ```shell
+kubectl create namespace argo-events
+kubectl create -f argo-events/install.yaml
+kubectl create -n argo-events -f argo-events/eventbus-native.yaml
+kubectl create -n argo-events -f argo-events/sensor-rbac.yaml
+kubectl create -n argo-events -f argo-events/workflow-rbac.yaml
+kubectl create -f argo-events/role_sensor.yaml
+kubectl create -f argo-events/rolebinding_sensor.yaml
+kubectl create -f argo-events/SA.yaml
+```
+
+- Check
+
+```shell
+kubectl create -n argo-events -f argo-events/webhook.yaml
+kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
+curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+kubectl -n argo-events get workflows | grep "webhook"
+```
+
+## Deploy MLOps
+
+- Deploy
+
+```shell
+kubectl create -f bootstrap/argo-events/Secret.yaml
+kubectl create -f bootstrap/argo-events/EventSource.yaml
+kubectl create -f bootstrap/argo-events/Ingress.yaml
+kubectl create -f bootstrap/argo-events/Sensor.yaml
 kubectl create -f docker-config.yaml
 kubectl -n argo create -f workflow.yml
 kubectl -n argocd delete application final-application
 ```
 
-- Install Argo Events
-
-```shell
-kubectl create namespace argo-events
-kubectl create -f bootstrap/argo-events/install.yaml
-kubectl apply -n argo-events -f bootstrap/argo-events/eventbus-native.yaml
-# kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/stable/manifests/install.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-# sensor rbac
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
- # workflow rbac
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/workflow-rbac.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
-kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
-curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-kubectl -n argo-events get workflows | grep "webhook"
-
-# [Quick Start](https://argoproj.github.io/argo-events/quick_start/)
-# [Get GitHub Token](https://argoproj.github.io/argo-events/eventsources/setup/github/)
-# .data.token
-
-kubectl create -f bootstrap/argo-events/Secret.yaml
-kubectl create -f bootstrap/argo-events/EventSource.yaml
-kubectl create -f bootstrap/argo-events/Ingress.yaml
-kubectl create -f bootstrap/argo-events/Sensor.yaml
-kubectl create -f role_sensor.yaml
-kubectl create -f rolebinding_sensor.yaml
-```
-
 ## Reference
 
-1. [Machine Learning Operations](https://ml-ops.org/)
+- [Machine Learning Operations](https://ml-ops.org/)
 
-2. [Cloudflare - cert-manager Documentation](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
+- [Cloudflare - cert-manager Documentation](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
+
+- [Argo Events Quick Start](https://argoproj.github.io/argo-events/quick_start/)
+
+- [Get GitHub Token](https://argoproj.github.io/argo-events/eventsources/setup/github/)

@@ -133,10 +133,11 @@ kubectl -n postgresql rollout status statefulset/postgresql-postgresql
 # postgresql.postgresql.svc.cluster.local - Read/Write connection
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace postgresql postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace postgresql --image docker.io/bitnami/postgresql:11.14.0-debian-10-r28 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgresql -U postgres -d postgres -p 5432
-# create database registry;
-# create database notary_signer;
-# create database notary_server;
-# \l
+create database registry;
+create database notary_signer;
+create database notary_server;
+\l
+\q
 echo ${POSTGRES_PASSWORD}
 ```
 
@@ -145,13 +146,13 @@ echo ${POSTGRES_PASSWORD}
 - Deploy
 
 ```shell
-
+kubectl create -f applications/harbor.yml
 ```
 
 - Check
 
 ```shell
-
+kubectl -n harbor rollout status deployment harbor-core
 ```
 
 ## Other

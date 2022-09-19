@@ -10,9 +10,9 @@ spec:
     namespace: nfs-server-provisioner
     server: 'https://kubernetes.default.svc'
   source:
-    path: bootstrap/nfs-server-provisioner
-    repoURL: 'https://github.com/abuxliu/argo-workflows-ci-example.git'
-    targetRevision: HEAD
+    path: argo-workflows-ci-example/nfs-server-provisioner
+    repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
+    targetRevision: feature-integration
   project: default
   syncPolicy:
     automated:

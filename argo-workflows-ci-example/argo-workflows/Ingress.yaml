@@ -11,7 +11,7 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: argo.abu.pub
+  - host: argo.test.abu.pub
     http:
       paths:
       - path: /
@@ -23,5 +23,5 @@ spec:
               name: web
   tls:
   - hosts:
-    - argo.abu.pub
-    secretName: argo-abu-pub-tls
+    - argo.test.abu.pub
+    secretName: argo-test-abu-pub-tls

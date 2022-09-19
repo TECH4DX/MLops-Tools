@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - manifest.yaml
 - rolebinding.yml
+- Ingress.yaml
 
 patches:
 - path: workflow-controller-configmap.yaml

@@ -1,9 +1,15 @@
 # Machine Learning Operations
 
+## Env
+
+- 10.95.160.8 is your server's ip
+
+- *.test.abu.pub is your managed domain
+
 ## Deploy Kubernetes
 
 ```shell
-# 10.95.160.8 is your server's ip
+# 
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address 10.95.160.8 --node-external-ip 10.95.160.8
 mkdir /root/.kube/
 ln -sf /etc/rancher/k3s/k3s.yaml /root/.kube/config
@@ -18,10 +24,16 @@ kubectl config set-cluster default --server=https://10.95.160.8:6443
 kubectl create -f cert-manager/namespace.yaml
 ```
 
-- Deployment cert-manager
+- Deploy
 
 ```shell
 kubectl create -f cert-manager/manifest.yaml
+```
+
+- Check
+
+```shell
+kubectl -n cert-manager rollout status deployment/cert-manager-webhook
 ```
 
 - Add DNS record Use Cloudflare
@@ -48,13 +60,13 @@ kubectl create -f cert-manager/ClusterIssuer.yaml
 
 ## Deploy Argo CD
 
-- Deployment Argo CD
+- Deploy
 
 ```shell
-kubectl apply -k argocd
+kubectl apply -k argocd/
 ```
 
-- Check Status
+- Check
 
 ```shell
 kubectl -n argocd rollout status statefulset/argocd-application-controller
@@ -70,16 +82,38 @@ echo "Complete. You should be able to navigate to https://argocd.test.abu.pub ad
 
 ## Deploy Workflow
 
+- Deploy
+
 ```shell
-kubectl -n argocd apply -f default.yml
-sleep 30
-kubectl -n nfs-server-provisioner rollout status statefulset/nfs-server-provisioner
+kubectl create namespace argo
+kubectl apply -k argo-workflows/
+```
+
+- Check
+
+```shell
 kubectl -n argo rollout status deployment/workflow-controller
 kubectl -n argo rollout status deployment/argo-server
+```
+
+## Deploy NFS Server Provisioner
+
+- Deploy
+
+```shell
+kubectl create -f applications/nfs-server-provisioner.yml
+```
+
+- Check
+
+```shell
+kubectl -n nfs-server-provisioner rollout status statefulset/nfs-server-provisioner
+```
+
+## Other
+
+```shell
 kubectl create -f docker-config.yaml
-kubectl apply -f bootstrap/cert-manager/manifest.yaml
-kubectl -n cert-manager rollout status deployment/cert-manager-webhook
-kubectl apply -f bootstrap/cert-manager/ClusterIssuer.yaml
 kubectl -n argo create -f workflow.yml
 kubectl -n argocd delete application final-application
 ```

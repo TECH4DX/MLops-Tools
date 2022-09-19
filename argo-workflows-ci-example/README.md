@@ -1,16 +1,76 @@
-# argo-workflows-ci-example
+# Machine Learning Operations
 
-## Steps to Run
-
-- Install
+## Deploy Kubernetes
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address 159.138.150.166 --node-external-ip 159.138.150.166
-cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
-kubectl config set-cluster default --server=https://159.138.150.166:6443
-kubectl apply -k bootstrap/argocd
+# 10.95.160.8 is your server's ip
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address 10.95.160.8 --node-external-ip 10.95.160.8
+mkdir /root/.kube/
+ln -sf /etc/rancher/k3s/k3s.yaml /root/.kube/config
+kubectl config set-cluster default --server=https://10.95.160.8:6443
+```
+
+## Deploy cert-manager
+
+- Create namespace
+
+```shell
+kubectl create -f cert-manager/namespace.yaml
+```
+
+- Deployment cert-manager
+
+```shell
+kubectl create -f cert-manager/manifest.yaml
+```
+
+- Add DNS record Use Cloudflare
+
+```text
+Type: A
+Name: *.test
+IPv4 address: 10.95.160.8
+Proxy status: DNS only
+TTL: Auto
+```
+
+- Create Cloudflare Custom Token Use Cloudflare, and Modify cert-manager/ClusterIssuer.yaml, see Reference 2
+
+```text
+api-token: sZtljE0iuaNy1pb1veCv3jln_B85cRkZ8SPOROe_
+```
+
+- Create Secret & ClusterIssuer
+
+```shell
+kubectl create -f cert-manager/ClusterIssuer.yaml
+```
+
+## Deploy Argo CD
+
+- Deployment Argo CD
+
+```shell
+kubectl apply -k argocd
+```
+
+- Check Status
+
+```shell
 kubectl -n argocd rollout status statefulset/argocd-application-controller
 kubectl -n argocd rollout status deployment/argocd-repo-server
+```
+
+- Get Argo CD Password
+
+```shell
+PASSWORD=`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`
+echo "Complete. You should be able to navigate to https://argocd.test.abu.pub admin ${PASSWORD}"
+```
+
+## Deploy Workflow
+
+```shell
 kubectl -n argocd apply -f default.yml
 sleep 30
 kubectl -n nfs-server-provisioner rollout status statefulset/nfs-server-provisioner
@@ -22,13 +82,6 @@ kubectl -n cert-manager rollout status deployment/cert-manager-webhook
 kubectl apply -f bootstrap/cert-manager/ClusterIssuer.yaml
 kubectl -n argo create -f workflow.yml
 kubectl -n argocd delete application final-application
-```
-
-- Get Argo CD Password
-
-```shell
-PASSWORD=`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`
-echo "Complete. You should be able to navigate to https://argocd.abu.pub admin ${PASSWORD}"
 ```
 
 - Install Argo Events
@@ -59,3 +112,9 @@ kubectl create -f bootstrap/argo-events/Sensor.yaml
 kubectl create -f role_sensor.yaml
 kubectl create -f rolebinding_sensor.yaml
 ```
+
+## Reference
+
+1. [Machine Learning Operations](https://ml-ops.org/)
+
+2. [Cloudflare - cert-manager Documentation](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)

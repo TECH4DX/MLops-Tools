@@ -20,7 +20,7 @@ spec:
     solvers:
     - dns01:
         cloudflare:
-          email: abuxliu@outlook.com
+          email: abuxliu@gmail.com
           apiTokenSecretRef:
             name: cloudflare-api-token-secret
             key: api-token

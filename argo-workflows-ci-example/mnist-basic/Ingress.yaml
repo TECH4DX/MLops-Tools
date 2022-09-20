@@ -1,7 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: demo
+  name: mnist
+  namespace: mnist-demo
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
     kubernetes.io/tls-acme: "true"
@@ -9,17 +10,17 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: demo.abu.pub
+  - host: mnist.test.abu.pub
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: example-application
+            name: mnist-web
             port:
               name: http
   tls:
   - hosts:
-    - demo.abu.pub
-    secretName: demo-abu-pub-tls
+    - mnist.test.abu.pub
+    secretName: mnist-test-abu-pub-tls

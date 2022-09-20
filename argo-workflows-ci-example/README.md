@@ -177,7 +177,7 @@ curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/j
 kubectl -n argo-events get workflows
 ```
 
-## Deploy MLOps
+## Deploy MLOps WorkflowTemplate
 
 - Deploy
 
@@ -185,15 +185,28 @@ kubectl -n argo-events get workflows
 kubectl create -f mlops/Secret.yaml
 kubectl create -f mlops/EventSource.yaml
 kubectl create -f mlops/Ingress.yaml
+kubectl -n argo create secret docker-registry docek-harbor --docker-server=https://harbor.test.abu.pub --docker-username=admin --docker-password=OpenSource@2022 --docker-email=abuxliu@gmail.com
 ```
 
-## Other
+## Deploy mnist Basic
+
+- Deploy
 
 ```shell
-kubectl create -f mlops/Sensor.yaml
-kubectl create -f docker-config.yaml
-kubectl -n argo create -f workflow.yml
-kubectl -n argocd delete application final-application
+kubectl create -f mnist-basic/ns.yaml
+kubectl -n mnist-demo create -f mnist-basic/secret.yaml
+kubectl -n mnist-demo create -f mnist-basic/create-serviceaccounts.yaml
+kubectl -n mnist-demo create -f mnist-basic/Ingress.yaml
+```
+
+## Deploy MLOps
+
+- Deploy
+
+```shell
+# kubectl create -f mlops/Sensor.yaml
+# or manual
+# kubectl create -f mlops/Workflow.yaml
 ```
 
 ## Reference

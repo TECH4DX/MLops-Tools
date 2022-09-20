@@ -161,7 +161,7 @@ kubectl -n mnist-demo create -f mnist-basic/Ingress.yaml
 # Manual
 kubectl -n argo create -f mlops/Workflow.yaml
 # or Auto
-# kubectl create -f mlops/Sensor.yaml
+kubectl create -f mlops/Sensor.yaml
 ```
 
 ## Reference

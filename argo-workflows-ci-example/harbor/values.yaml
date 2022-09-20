@@ -773,7 +773,7 @@ database:
     host: "postgresql.postgresql.svc.cluster.local"
     port: "5432"
     username: "postgres"
-    password: "xMsgXdrfbp"
+    password: "xn1F7VzsqT"
     coreDatabase: "registry"
     notaryServerDatabase: "notary_server"
     notarySignerDatabase: "notary_signer"

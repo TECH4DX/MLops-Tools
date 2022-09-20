@@ -109,16 +109,15 @@ echo ${POSTGRES_PASSWORD}
 
 ## Deploy Harbor
 
-> Modify harbor/values.yaml & harbor/templates/Certificate.yaml
+> Modify Domain & PG Password in harbor/values.yaml & harbor/templates/Certificate.yaml
 
 ```shell
 kubectl create -f applications/harbor.yml
 kubectl -n harbor rollout status deployment harbor-core
+echo "https://harbor.abu.pub admin OpenSource@2022"
 ```
 
 ## Deploy Argo Events
-
-- Deploy
 
 ```shell
 kubectl create namespace argo-events
@@ -129,11 +128,6 @@ kubectl create -n argo-events -f argo-events/workflow-rbac.yaml
 kubectl create -f argo-events/role_sensor.yaml
 kubectl create -f argo-events/rolebinding_sensor.yaml
 kubectl create -f argo-events/SA.yaml
-```
-
-- Check
-
-```shell
 kubectl create -n argo-events -f argo-events/webhook.yaml
 kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
 curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example

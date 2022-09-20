@@ -27,7 +27,7 @@ spec:
         template: create-service
   - name: train
     container:
-      image: abuxliu/mnist-example:latest
+      image: harbor.abu.pub/library/mnist-example:latest
       imagePullPolicy: Always
       env:
       - name: IS_TRAIN
@@ -52,7 +52,7 @@ spec:
       - name: model-path
         path: /mnist-example/ckpt
     container:
-      image: abuxliu/mnist-example:latest
+      image: harbor.abu.pub/library/mnist-example:latest
       imagePullPolicy: Always
       env:
       - name: IS_TRAIN
@@ -65,7 +65,7 @@ spec:
       - name: model-path
         path: /mnist-serving/mnist/data/ckpt
     container:
-      image: abuxliu/mnist-serving:latest
+      image: harbor.abu.pub/library/mnist-serving:latest
       imagePullPolicy: Always
       ports:
       - containerPort: 9003

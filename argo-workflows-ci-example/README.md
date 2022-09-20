@@ -136,19 +136,17 @@ kubectl -n argo-events get workflows
 
 ## Deploy MLOps WorkflowTemplate
 
-- Deploy
+> Modify Domain in EventSource.yaml & Ingress.yaml
 
 ```shell
 kubectl create -f mlops/Secret.yaml
 kubectl create -f mlops/EventSource.yaml
 kubectl create -f mlops/Ingress.yaml
-kubectl -n argo create secret docker-registry docek-harbor --docker-server=https://harbor.test.abu.pub --docker-username=admin --docker-password=OpenSource@2022 --docker-email=abuxliu@gmail.com
+kubectl -n argo create secret docker-registry docek-harbor --docker-server=https://harbor.abu.pub --docker-username=admin --docker-password=OpenSource@2022 --docker-email=abuxliu@gmail.com
 kubectl -n argo create -f mlops/WorkflowTemplate.yaml
 ```
 
 ## Deploy mnist Basic
-
-- Deploy
 
 ```shell
 kubectl create -f mnist-basic/ns.yaml
@@ -158,8 +156,6 @@ kubectl -n mnist-demo create -f mnist-basic/Ingress.yaml
 ```
 
 ## Deploy MLOps
-
-- Deploy
 
 ```shell
 # Manual

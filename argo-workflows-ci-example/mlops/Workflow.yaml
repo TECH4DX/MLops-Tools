@@ -18,7 +18,7 @@ spec:
     - name: container_tag
       value: 'latest'
     - name: container_image
-      value: "harbor.test.abu.pub/abuxliu/mnist-serving"
+      value: "harbor.abu.pub/library/mnist-serving"
     - name: dockerfile
       value: Dockerfile
     - name: path

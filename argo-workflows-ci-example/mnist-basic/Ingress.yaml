@@ -10,7 +10,7 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: mnist.test.abu.pub
+  - host: mnist.abu.pub
     http:
       paths:
       - path: /
@@ -22,5 +22,5 @@ spec:
               name: http
   tls:
   - hosts:
-    - mnist.test.abu.pub
-    secretName: mnist-test-abu-pub-tls
+    - mnist.abu.pub
+    secretName: mnist-abu-pub-tls

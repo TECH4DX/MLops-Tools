@@ -9,8 +9,6 @@ metadata:
 spec:
   arguments:
     parameters:
-    - name: head_commit_id
-    - name: repository_url
     - name: app_repo
       value: "MLops-Tools"
     - name: git_branch

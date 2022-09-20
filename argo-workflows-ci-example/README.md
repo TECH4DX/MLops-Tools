@@ -186,6 +186,7 @@ kubectl create -f mlops/Secret.yaml
 kubectl create -f mlops/EventSource.yaml
 kubectl create -f mlops/Ingress.yaml
 kubectl -n argo create secret docker-registry docek-harbor --docker-server=https://harbor.test.abu.pub --docker-username=admin --docker-password=OpenSource@2022 --docker-email=abuxliu@gmail.com
+kubectl -n argo create -f mlops/WorkflowTemplate.yaml
 ```
 
 ## Deploy mnist Basic
@@ -204,9 +205,10 @@ kubectl -n mnist-demo create -f mnist-basic/Ingress.yaml
 - Deploy
 
 ```shell
+# Manual
+kubectl -n argo create -f mlops/Workflow.yaml
+# or Auto
 # kubectl create -f mlops/Sensor.yaml
-# or manual
-# kubectl create -f mlops/Workflow.yaml
 ```
 
 ## Reference

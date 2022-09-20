@@ -164,6 +164,12 @@ kubectl -n argo create -f mlops/Workflow.yaml
 kubectl create -f mlops/Sensor.yaml
 ```
 
+## Again
+
+```shell
+kubectl -n argocd delete applications mnist
+```
+
 ## Reference
 
 - [Deploy Docker](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script)

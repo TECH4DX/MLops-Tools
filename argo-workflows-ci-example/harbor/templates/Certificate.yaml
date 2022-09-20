@@ -6,8 +6,8 @@ metadata:
   namespace: harbor
 spec:
   dnsNames:
-  - harbor.test.abu.pub
-  - notary.test.abu.pub
+  - harbor.abu.pub
+  - notary.abu.pub
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-dns01

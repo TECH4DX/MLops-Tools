@@ -2,36 +2,37 @@
 
 ## Env
 
-- 10.95.160.9 is your server's ip
+- *.abu.pub is your managed domain
 
-- *.test.abu.pub is your managed domain
+- IP
+
+```shell
+IP=`ifconfig eth0 | grep "inet " | awk '{print $2}'`
+```
+
+## Deploy Docker
+
+```shell
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+```
 
 ## Deploy Kubernetes
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address 10.95.160.9 --node-external-ip 10.95.160.9
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address ${IP} --node-external-ip ${IP}
 mkdir /root/.kube/
 ln -sf /etc/rancher/k3s/k3s.yaml /root/.kube/config
-kubectl config set-cluster default --server=https://10.95.160.9:6443
+kubectl config set-cluster default --server=https://${IP}:6443
+apt update
+apt install nfs-common -y
 ```
 
 ## Deploy cert-manager
 
-- Create namespace
-
 ```shell
 kubectl create -f cert-manager/namespace.yaml
-```
-
-- Deploy
-
-```shell
 kubectl create -f cert-manager/manifest.yaml
-```
-
-- Check
-
-```shell
 kubectl -n cert-manager rollout status deployment/cert-manager-webhook
 ```
 
@@ -39,10 +40,8 @@ kubectl -n cert-manager rollout status deployment/cert-manager-webhook
 
 ```text
 Type: A
-Name: *.test
-IPv4 address: 10.95.160.8
-Proxy status: DNS only
-TTL: Auto
+Name: *
+IPv4 address: ${IP}
 ```
 
 - Create Cloudflare Custom Token Use Cloudflare, and Modify cert-manager/ClusterIssuer.yaml, see Reference 2
@@ -59,15 +58,8 @@ kubectl create -f cert-manager/ClusterIssuer.yaml
 
 ## Deploy Argo CD
 
-- Deploy
-
 ```shell
 kubectl apply -k argocd/
-```
-
-- Check
-
-```shell
 kubectl -n argocd rollout status statefulset/argocd-application-controller
 kubectl -n argocd rollout status deployment/argocd-repo-server
 ```
@@ -76,7 +68,7 @@ kubectl -n argocd rollout status deployment/argocd-repo-server
 
 ```shell
 PASSWORD=`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`
-echo "Complete. You should be able to navigate to https://argocd.test.abu.pub admin ${PASSWORD}"
+echo "Complete. You should be able to navigate to https://argocd.abu.pub admin ${PASSWORD}"
 ```
 
 ## Deploy Workflow
@@ -86,49 +78,24 @@ echo "Complete. You should be able to navigate to https://argocd.test.abu.pub ad
 ```shell
 kubectl create namespace argo
 kubectl apply -k argo-workflows/
-```
-
-- Check
-
-```shell
 kubectl -n argo rollout status deployment/workflow-controller
 kubectl -n argo rollout status deployment/argo-server
+echo "https://argo.abu.pub"
 ```
 
 ## Deploy NFS Server Provisioner
 
-- Deploy
-
 ```shell
 kubectl delete sc local-path
-apt update
-apt install nfs-common -y
 kubectl create -f applications/nfs-server-provisioner.yml
-```
-
-- Check
-
-```shell
 kubectl -n nfs-server-provisioner rollout status statefulset/nfs-server-provisioner
 ```
 
 ## Deploy Postgres
 
-- Deploy
-
 ```shell
 kubectl create -f applications/postgresql.yml
-```
-
-- Check
-
-```shell
 kubectl -n postgresql rollout status statefulset/postgresql-postgresql
-```
-
-- Create Databse
-
-```shell
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace postgresql postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace postgresql --image docker.io/bitnami/postgresql:11.14.0-debian-10-r28 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgresql -U postgres -d postgres -p 5432
 create database registry;
@@ -136,20 +103,16 @@ create database notary_signer;
 create database notary_server;
 \l
 \q
+kubectl -n postgresql delete pods postgresql-client
 echo ${POSTGRES_PASSWORD}
 ```
 
 ## Deploy Harbor
 
-- Deploy
+> Modify harbor/values.yaml & harbor/templates/Certificate.yaml
 
 ```shell
 kubectl create -f applications/harbor.yml
-```
-
-- Check
-
-```shell
 kubectl -n harbor rollout status deployment harbor-core
 ```
 
@@ -212,6 +175,8 @@ kubectl -n argo create -f mlops/Workflow.yaml
 ```
 
 ## Reference
+
+- [Deploy Docker](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script)
 
 - [Machine Learning Operations](https://ml-ops.org/)
 

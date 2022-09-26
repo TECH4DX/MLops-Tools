@@ -1,0 +1,34 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github
+  namespace: argo-events
+spec:
+  service:
+    ports:
+      - name: github
+        port: 12000
+        targetPort: 12000
+  github:
+    github-push:
+      repositories:
+        - owner: abuxliu
+          names:
+            - mnist-serving
+      webhook:
+        endpoint: /push
+        port: "12000"
+        method: POST
+        url: https://github.abu.pub
+      events:
+        - "push"
+      apiToken:
+        name: github-access
+        key: token
+      webhookSecret:
+        name: github-access
+        key: secret
+      insecure: false
+      active: true
+      contentType: json

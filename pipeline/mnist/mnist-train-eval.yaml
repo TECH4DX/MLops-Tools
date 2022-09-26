@@ -1,0 +1,114 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: mnist-train-eval
+spec:
+  serviceAccountName: mnist-sa
+  entrypoint: mnist-controller
+  onExit: delete
+  templates:
+  - name: mnist-controller
+    steps:
+    - - name: mnist-train
+        template: train
+    - - name: mnist-eval
+        template: eval
+        arguments:
+          artifacts:
+          - name: model-path
+            from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
+      - name: mnist-serving
+        template: server
+        arguments:
+          artifacts:
+          - name: model-path
+            from: "{{steps.mnist-train.outputs.artifacts.model-saved}}"
+      - name: mnist-web
+        template: create-service
+  - name: train
+    container:
+      image: harbor.abu.pub/library/mnist-example:latest
+      imagePullPolicy: Always
+      env:
+      - name: IS_TRAIN
+        value: "True"
+      - name: NUM_STEPS
+        value: "1000"
+      command: ['python3']
+      args: ["mnist_train_eval.py"]
+    outputs:
+      artifacts:
+      - name: model-saved
+        path: /mnist-example/ckpt
+        gcs:
+          bucket: mlops-example-bucket-ming
+          key: mnist-example-models-demo
+          serviceAccountKeySecret:
+            name: mlops-bucket-serviceaccount
+            key: serviceAccountKey
+  - name: eval
+    inputs:
+      artifacts:
+      - name: model-path
+        path: /mnist-example/ckpt
+    container:
+      image: harbor.abu.pub/library/mnist-example:latest
+      imagePullPolicy: Always
+      env:
+      - name: IS_TRAIN
+        value: "False"
+      command: ['python3']
+      args: ["mnist_train_eval.py"]
+  - name: server
+    inputs:
+      artifacts:
+      - name: model-path
+        path: /mnist-serving/mnist/data/ckpt
+    container:
+      image: harbor.abu.pub/library/mnist-serving:latest
+      imagePullPolicy: Always
+      ports:
+      - containerPort: 9003
+      command: ['python3']
+      args: ["main.py"]
+    metadata:
+      labels:
+        app: mnist-web
+  - name: create-service
+    resource:
+        action: apply
+        manifest: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: mnist-web
+            labels:
+              app: mnist-web
+          spec:
+            ports:
+              - port: 9003
+                name: http
+                targetPort: 9003
+                protocol: TCP
+            type: ClusterIP
+            selector:
+              app: mnist-web
+  - name: delete
+    resource:
+        action: delete
+        manifest: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: mnist-web
+            labels:
+              app: mnist-web
+          spec:
+            ports:
+              - port: 9003
+                name: http
+                targetPort: 9003
+                protocol: TCP
+            type: ClusterIP
+            selector:
+              app: mnist-web

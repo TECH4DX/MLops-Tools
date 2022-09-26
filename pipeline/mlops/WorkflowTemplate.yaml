@@ -1,0 +1,239 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci-workflow
+  annotations:
+    workflows.argoproj.io/version: '>= 3.3.6'
+spec:
+  metrics:
+    prometheus:
+      - name: exec_duration_gauge
+        labels:
+          - key: name
+            value: "ci-workflow"
+          - key: type
+            value: "pull-request"
+          - key: status
+            value: "{{status}}"
+        help: "Duration gauge by name"
+        gauge:
+          value: "{{workflow.duration}}"
+          realtime: false
+      - name: result_counter
+        help: "Count of step execution by result status"
+        labels:
+          - key: status
+            value: Failed
+          - key: name
+            value: "ci-workflow"
+          - key: type
+            value: "pull-request"
+        when: "{{status}} == Failed"
+        counter:
+          value: "1"
+      - name: result_counter
+        help: "Count of step execution by result status"
+        labels:
+          - key: status
+            value: Succeeded
+          - key: name
+            value: "ci-workflow"
+          - key: type
+            value: "pull-request"
+        when: "{{status}} == Succeeded"
+        counter:
+          value: "1"
+  entrypoint: main
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteMany" ]
+      storageClassName: nfs
+      resources:
+        requests:
+          storage: 5Gi
+  volumes:
+  - name: container-build
+    emptyDir: {}
+  - name: kaniko-secret
+    secret:
+      secretName: docek-harbor
+      items:
+        - key: .dockerconfigjson
+          path: config.json
+  arguments:
+    parameters:
+    - name: app_repo
+      value: ""
+    - name: git_branch
+      value: ""
+    - name: target_branch
+      value: ""
+    - name: container_tag
+      value: "stable"
+    - name: container_image
+      value: ""
+    - name: dockerfile
+      value: ""
+    - name: path
+      value: ""
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: git-checkout-pr
+            templateRef:
+              name: git-checkout-pr
+              template: main
+          - name: container-build
+            templateRef:
+              name: container-build
+              template: main
+            depends: git-checkout-pr
+          - name: deploy-mnist
+            templateRef:
+              name: mnist
+              template: main
+            depends: container-build
+          - name: delete-mnist
+            template: delete-mnist
+            depends: (deploy-mnist.Failed)
+    - name: delete-mnist
+      resource:
+        action: delete
+        manifest: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: mnist
+            namespace: argocd
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: git-checkout-pr
+  annotations:
+    workflows.argoproj.io/version: '>= 3.3.6'
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    dag:
+      tasks:
+        - name: git-checkout-pr
+          template: git-checkout-pr
+
+  - name: git-checkout-pr
+    container:
+      image: alpine:latest
+      command:
+        - sh
+        - -c
+        - |
+          apk --update add git
+
+          cd /workdir
+          echo "Start Clone of source branch"
+          git clone https://github.com/abuxliu/{{workflow.parameters.app_repo}}.git
+          cd {{workflow.parameters.app_repo}}
+
+          ## These lines are a hack just for the example.
+          git config --global --add safe.directory /workdir/{{workflow.parameters.app_repo}}
+          git config --global user.email "abuxliu@gmail.com"
+          git config --global user.name "abu"
+
+          git checkout {{workflow.parameters.git_branch}}
+
+          echo "Merge in target branch"
+          git merge origin/{{workflow.parameters.target_branch}}
+
+          echo "Complete."
+      volumeMounts:
+      - name: "workdir"
+        mountPath: /workdir
+      resources:
+        requests:
+          memory: 1Gi
+          cpu: 1
+      activeDeadlineSeconds: 1200
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: container-build
+  annotations:
+    workflows.argoproj.io/version: '>= 3.3.6'
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    dag:
+      tasks:
+        - name: container-build
+          template: container-build
+  - name: container-build
+    container:
+      image: gcr.io/kaniko-project/executor:debug
+      imagePullPolicy: Always
+      command: ['sh', '-c']
+      args:
+      - echo "Retrieving git clone..." && cp -R /workdir/{{workflow.parameters.app_repo}} /container-build
+
+        /kaniko/executor --dockerfile="/container-build/{{workflow.parameters.app_repo}}{{workflow.parameters.path}}/{{workflow.parameters.dockerfile}}" --destination={{workflow.parameters.container_image}}:{{workflow.parameters.container_tag}} --context="dir:///container-build/{{workflow.parameters.app_repo}}/{{workflow.parameters.path}}" --cache=true --use-new-run=true --reproducible=true --push-retry=3
+      volumeMounts:
+        - name: container-build
+          mountPath: /container-build
+        - name: workdir
+          mountPath: /workdir
+        - name: kaniko-secret
+          mountPath: /kaniko/.docker/
+      resources:
+        requests:
+          memory: 4Gi
+          cpu: 2
+      activeDeadlineSeconds: 1200
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: mnist
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    dag:
+      tasks:            
+        - name: mnist
+          template: mnist
+  - name: mnist
+    resource:
+      action: create
+      successCondition: status.health.status == Healthy
+      failureCondition: status.health.status == Degraded
+      manifest: |
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: mnist
+          finalizers:
+            - resources-finalizer.argocd.argoproj.io
+          namespace: argocd
+        spec:
+          destination:
+            namespace: mnist-demo
+            server: 'https://kubernetes.default.svc'
+          project: default
+          source:
+            path: argo-workflows-ci-example/mnist
+            repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
+            targetRevision: feature-integration
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - PrunePropagationPolicy=background
+              - PruneLast=true
+              - CreateNamespace=true

@@ -1,0 +1,27 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ci-workflow-
+  namespace: argo
+  labels:
+    workflows.argoproj.io/workflow-template: ci-workflow
+spec:
+  arguments:
+    parameters:
+    - name: app_repo
+      value: "MLops-Tools"
+    - name: git_branch
+      value: 'main'
+    - name: target_branch
+      value: 'main'
+    - name: container_tag
+      value: 'latest'
+    - name: container_image
+      value: "harbor.abu.pub/library/mnist-serving"
+    - name: dockerfile
+      value: Dockerfile
+    - name: path
+      value: "/workflows/examples/mnist-serving/docker/"
+  workflowTemplateRef:
+    name: ci-workflow

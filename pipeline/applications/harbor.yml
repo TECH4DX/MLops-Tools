@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+spec:
+  destination:
+    namespace: harbor
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: argo-workflows-ci-example/harbor
+    repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
+    targetRevision: feature-integration
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - PrunePropagationPolicy=background
+      - CreateNamespace=true

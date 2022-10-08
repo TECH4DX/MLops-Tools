@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workflow-controller-configmap
+data:  
+  executor: |
+    imagePullPolicy: Always
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  workflowDefaults: |
+    spec:
+      # Time out after 1h
+      activeDeadlineSeconds: 3600
+      # Delete (archive) workflows after 48h
+      ttlStrategy:
+        secondsAfterCompletion: 172800
+      volumeClaimGC:
+        strategy: OnWorkflowCompletion
+      retryStrategy:
+        retryPolicy: OnError
+        limit: 3
+      serviceAccountName: argo

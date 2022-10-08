@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: harbor-abu-pub-tls
+  namespace: harbor
+spec:
+  dnsNames:
+  - harbor.abu.pub
+  - notary.abu.pub
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-dns01
+  secretName: harbor-abu-pub-tls

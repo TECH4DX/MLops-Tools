@@ -1,3 +1,4 @@
+# This is an auto-generated file. DO NOT EDIT
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -1063,18 +1064,7 @@ spec:
       containers:
       - args:
         - server
-        - --auth-mode=server
-        env:
-          - name: BASE_HREF
-            value: /
-          - name: FIRST_TIME_USER_MODAL
-            value: "false"
-          - name: FEEDBACK_MODAL
-            value: "false"
-          - name: NEW_VERSION_MODAL
-            value: "false"
-          - name: ARGO_SECURE
-            value: "false"
+        env: []
         image: quay.io/argoproj/argocli:v3.3.8
         name: argo-server
         ports:
@@ -1084,7 +1074,7 @@ spec:
           httpGet:
             path: /
             port: 2746
-            scheme: HTTP
+            scheme: HTTPS
           initialDelaySeconds: 10
           periodSeconds: 20
         securityContext:

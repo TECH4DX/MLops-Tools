@@ -5,13 +5,14 @@ metadata:
   name: argo-server-ingress
   namespace: argo
   annotations:
+    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-dns01
     kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: argo.abu.pub
+  - host: workflows.mlops.pub
     http:
       paths:
       - path: /
@@ -23,5 +24,5 @@ spec:
               name: web
   tls:
   - hosts:
-    - argo.abu.pub
-    secretName: argo-abu-pub-tls
+    - workflows.mlops.pub
+    secretName: argo-mlops-pub-tls

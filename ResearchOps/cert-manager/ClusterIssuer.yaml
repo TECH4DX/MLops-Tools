@@ -6,7 +6,7 @@ metadata:
   namespace: cert-manager
 type: Opaque
 stringData:
-  api-token: sZtljE0iuaNy1pb1veCv3jln_B85cRkZ8SPOROe_
+  api-token: rxxxxxxxxK
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -20,7 +20,7 @@ spec:
     solvers:
     - dns01:
         cloudflare:
-          email: abuxliu@gmail.com
+          email: guoqiang.qi1@gmail.com
           apiTokenSecretRef:
             name: cloudflare-api-token-secret
             key: api-token

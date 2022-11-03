@@ -4,13 +4,14 @@ metadata:
   name: argocd-server-ingress
   namespace: argocd
   annotations:
+    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-dns01
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: argocd.abu.pub
+  - host: cd.mlops.pub
     http:
       paths:
       - path: /
@@ -22,5 +23,5 @@ spec:
               name: http
   tls:
   - hosts:
-    - argocd.abu.pub
-    secretName: argocd-abu-pub-tls
+    - cd.mlops.pub
+    secretName: cd-mlops-pub-tls

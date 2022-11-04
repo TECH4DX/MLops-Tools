@@ -76,7 +76,6 @@ echo "Complete. You should be able to navigate to https://argocd.abu.pub admin $
 - Deploy
 
 ```shell
-kubectl create namespace argo
 kubectl apply -k argo-workflows/
 kubectl -n argo rollout status deployment/workflow-controller
 kubectl -n argo rollout status deployment/argo-server

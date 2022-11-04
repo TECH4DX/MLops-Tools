@@ -8,9 +8,9 @@ spec:
     namespace: postgresql
     server: 'https://kubernetes.default.svc'
   source:
-    path: argo-workflows-ci-example/postgresql
+    path: ResearchOps/postgresql
     repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
-    targetRevision: feature-integration
+    targetRevision: main
   project: default
   syncPolicy:
     automated:

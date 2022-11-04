@@ -8,9 +8,9 @@ spec:
     namespace: harbor
     server: 'https://kubernetes.default.svc'
   source:
-    path: argo-workflows-ci-example/harbor
+    path: ResearchOps/harbor
     repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
-    targetRevision: feature-integration
+    targetRevision: main
   project: default
   syncPolicy:
     automated:

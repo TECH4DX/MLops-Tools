@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argo-events-webhook-demo
+  namespace: argo-events
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+spec:
+  rules:
+  - host: argoevents-webhook-demo.mlops.pub
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webhook-eventsource
+            port:
+              number: 12000
+  tls:
+  - hosts:
+    - argoevents-webhook-demo.mlops.pub
+    secretName: argoevents-webhook-demo-mlops-pub-tls

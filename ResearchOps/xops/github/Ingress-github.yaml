@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: github-eventsource-ingress
-  namespace: argo-events
+  namespace: github-mnist
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
     kubernetes.io/tls-acme: "true"
@@ -10,7 +10,7 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
-  - host: github.abu.pub
+  - host: github.mlops.pub
     http:
       paths:
       - path: /
@@ -22,5 +22,5 @@ spec:
               name: github
   tls:
   - hosts:
-    - github.abu.pub
-    secretName: github-abu-pub-tls
+    - github.mlops.pub
+    secretName: github-mlops-pub-tls

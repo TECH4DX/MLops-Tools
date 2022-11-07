@@ -3,10 +3,11 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: ci-workflow-
-  namespace: argo
+  namespace: github-mnist
   labels:
     workflows.argoproj.io/workflow-template: ci-workflow
 spec:
+  serviceAccountName: mnist-sa
   arguments:
     parameters:
     - name: app_repo
@@ -18,7 +19,7 @@ spec:
     - name: container_tag
       value: 'latest'
     - name: container_image
-      value: "harbor.abu.pub/library/mnist-serving"
+      value: "harbor.mlops.pub/library/mnist-serving"
     - name: dockerfile
       value: Dockerfile
     - name: path

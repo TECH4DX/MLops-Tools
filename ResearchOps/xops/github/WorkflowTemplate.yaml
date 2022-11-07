@@ -3,6 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: ci-workflow
+  namespace: github-mnist
   annotations:
     workflows.argoproj.io/version: '>= 3.3.6'
 spec:
@@ -108,12 +109,13 @@ spec:
           kind: Application
           metadata:
             name: mnist
-            namespace: argocd
+            namespace: github-mnist
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: git-checkout-pr
+  namespace: github-mnist
   annotations:
     workflows.argoproj.io/version: '>= 3.3.6'
 spec:
@@ -136,13 +138,13 @@ spec:
 
           cd /workdir
           echo "Start Clone of source branch"
-          git clone https://github.com/abuxliu/{{workflow.parameters.app_repo}}.git
+          git clone https://github.com/guoqiangqi/{{workflow.parameters.app_repo}}.git
           cd {{workflow.parameters.app_repo}}
 
           ## These lines are a hack just for the example.
           git config --global --add safe.directory /workdir/{{workflow.parameters.app_repo}}
-          git config --global user.email "abuxliu@gmail.com"
-          git config --global user.name "abu"
+          git config --global user.email "guoqiang.qi1@gmail.com"
+          git config --global user.name "Guoqiang QI"
 
           git checkout {{workflow.parameters.git_branch}}
 
@@ -163,6 +165,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: container-build
+  namespace: github-mnist
   annotations:
     workflows.argoproj.io/version: '>= 3.3.6'
 spec:
@@ -199,6 +202,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: mnist
+  namespace: github-mnist
 spec:
   entrypoint: main
   templates:
@@ -218,17 +222,17 @@ spec:
         metadata:
           name: mnist
           finalizers:
-            - resources-finalizer.argocd.argoproj.io
-          namespace: argocd
+            - resources-finalizer.github-mnist.argoproj.io
+          namespace: github-mnist
         spec:
           destination:
-            namespace: mnist-demo
+            namespace: github-mnist
             server: 'https://kubernetes.default.svc'
           project: default
           source:
-            path: argo-workflows-ci-example/mnist
+            path: ResearchOps/xops/mnist
             repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
-            targetRevision: feature-integration
+            targetRevision: main
           syncPolicy:
             automated:
               prune: true

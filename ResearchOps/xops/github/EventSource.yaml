@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
   name: github
-  namespace: argo-events
+  namespace: github-mnist
 spec:
   service:
     ports:
@@ -13,14 +13,14 @@ spec:
   github:
     github-push:
       repositories:
-        - owner: abuxliu
+        - owner: guoqiangqi
           names:
             - mnist-serving
       webhook:
         endpoint: /push
         port: "12000"
         method: POST
-        url: https://github.abu.pub
+        url: https://github.mlops.pub
       events:
         - "push"
       apiToken:

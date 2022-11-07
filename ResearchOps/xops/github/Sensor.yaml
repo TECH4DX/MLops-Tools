@@ -2,14 +2,14 @@ apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: github
-  namespace: argo-events
+  namespace: github-mnist
 spec:
   dependencies:
     - name: github-push
       eventSourceName: github
       eventName: github-push
   template:
-    serviceAccountName: operate-workflow-sa
+    serviceAccountName: mnist-sa
   triggers:
   - template:
       name: github-workflow-trigger
@@ -30,7 +30,7 @@ spec:
             kind: Workflow
             metadata:
               generateName: ci-workflow-
-              namespace: argo
+              namespace: github-mnist
               labels:
                 workflows.argoproj.io/workflow-template: ci-workflow
             spec:
@@ -47,7 +47,7 @@ spec:
                 - name: container_tag
                   value: 'latest'
                 - name: container_image
-                  value: "harbor.abu.pub/library/mnist-serving"
+                  value: "harbor.mlops.pub/library/mnist-serving"
                 - name: dockerfile
                   value: Dockerfile
                 - name: path

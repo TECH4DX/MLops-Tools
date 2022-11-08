@@ -60,7 +60,7 @@ spec:
     emptyDir: {}
   - name: kaniko-secret
     secret:
-      secretName: docek-harbor
+      secretName: docker-harbor
       items:
         - key: .dockerconfigjson
           path: config.json
@@ -230,7 +230,7 @@ spec:
             server: 'https://kubernetes.default.svc'
           project: default
           source:
-            path: ResearchOps/xops/mnist
+            path: ResearchOps/mnist
             repoURL: 'https://github.com/TECH4DX/MLops-Tools.git'
             targetRevision: main
           syncPolicy:

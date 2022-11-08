@@ -1,8 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mnist
-  namespace: github-mnist
+  name: mnist-ingress
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
     kubernetes.io/tls-acme: "true"

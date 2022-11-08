@@ -138,7 +138,7 @@ spec:
 
           cd /workdir
           echo "Start Clone of source branch"
-          git clone https://github.com/guoqiangqi/{{workflow.parameters.app_repo}}.git
+          git clone https://github.com/TECH4DX/{{workflow.parameters.app_repo}}.git
           cd {{workflow.parameters.app_repo}}
 
           ## These lines are a hack just for the example.
@@ -185,6 +185,8 @@ spec:
       - echo "Retrieving git clone..." && cp -R /workdir/{{workflow.parameters.app_repo}} /container-build
 
         /kaniko/executor --dockerfile="/container-build/{{workflow.parameters.app_repo}}{{workflow.parameters.path}}/{{workflow.parameters.dockerfile}}" --destination={{workflow.parameters.container_image}}:{{workflow.parameters.container_tag}} --context="dir:///container-build/{{workflow.parameters.app_repo}}/{{workflow.parameters.path}}" --cache=true --use-new-run=true --reproducible=true --push-retry=3
+
+        /kaniko/executor --dockerfile="/container-build/{{workflow.parameters.app_repo}}/workflows/examples/mnist/docker/{{workflow.parameters.dockerfile}}" --destination=harbor.mlops.pub/library/mnist:{{workflow.parameters.container_tag}} --context="dir:///container-build/{{workflow.parameters.app_repo}}/workflows/examples/mnist/docker/" --cache=true --use-new-run=true --reproducible=true --push-retry=3
       volumeMounts:
         - name: container-build
           mountPath: /container-build
@@ -223,7 +225,7 @@ spec:
           name: mnist
           finalizers:
             - resources-finalizer.github-mnist.argoproj.io
-          namespace: github-mnist
+          namespace: argocd
         spec:
           destination:
             namespace: github-mnist

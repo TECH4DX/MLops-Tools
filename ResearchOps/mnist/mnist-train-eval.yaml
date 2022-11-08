@@ -27,7 +27,7 @@ spec:
         template: create-service
   - name: train
     container:
-      image: harbor.mlops.pub/library/mnist-example:latest
+      image: harbor.mlops.pub/library/mnist:latest
       imagePullPolicy: Always
       env:
       - name: IS_TRAIN
@@ -52,7 +52,7 @@ spec:
       - name: model-path
         path: /mnist-example/ckpt
     container:
-      image: harbor.mlops.pub/library/mnist-example:latest
+      image: harbor.mlops.pub/library/mnist:latest
       imagePullPolicy: Always
       env:
       - name: IS_TRAIN

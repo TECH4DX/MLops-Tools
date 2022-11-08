@@ -223,8 +223,6 @@ spec:
         kind: Application
         metadata:
           name: mnist
-          finalizers:
-            - resources-finalizer.github-mnist.argoproj.io
           namespace: argocd
         spec:
           destination:

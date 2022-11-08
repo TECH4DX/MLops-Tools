@@ -15,7 +15,7 @@ spec:
       repositories:
         - owner: guoqiangqi
           names:
-            - mnist-serving
+            - webhook-test
       webhook:
         endpoint: /push
         port: "12000"

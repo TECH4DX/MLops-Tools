@@ -4,10 +4,9 @@ metadata:
   name: github-eventsource-ingress
   namespace: github-mnist
   annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: letsencrypt-dns01
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
   - host: github.mlops.pub

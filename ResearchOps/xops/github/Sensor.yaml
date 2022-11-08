@@ -34,6 +34,7 @@ spec:
               labels:
                 workflows.argoproj.io/workflow-template: ci-workflow
             spec:
+              serviceAccountName: mnist-sa
               arguments:
                 parameters:
                 - name: head_commit_id

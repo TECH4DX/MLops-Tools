@@ -216,8 +216,8 @@ spec:
   - name: mnist
     resource:
       action: create
-      successCondition: status.health.status == Healthy
-      failureCondition: status.health.status == Degraded
+      # successCondition: status.health.status == Healthy
+      # failureCondition: status.health.status == Degraded
       manifest: |
         apiVersion: argoproj.io/v1alpha1
         kind: Application

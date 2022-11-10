@@ -15,7 +15,7 @@ data:
   workflowDefaults: |
     spec:
       # Time out after 1h
-      activeDeadlineSeconds: 3600
+      # activeDeadlineSeconds: 3600
       # Delete (archive) workflows after 48h
       ttlStrategy:
         secondsAfterCompletion: 172800

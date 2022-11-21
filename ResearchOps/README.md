@@ -2,7 +2,7 @@
 
 ## Env
 
-- *.abu.pub is your managed domain
+- *.mlops.pub is your managed domain
 
 - IP
 
@@ -18,22 +18,14 @@ sudo sh get-docker.sh
 ```
 
 ## Deploy Kubernetes
-
-```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.3+k3s1 sh -s - --advertise-address ${IP} --node-external-ip ${IP}
-mkdir /root/.kube/
-ln -sf /etc/rancher/k3s/k3s.yaml /root/.kube/config
-kubectl config set-cluster default --server=https://${IP}:6443
-apt update
-apt install nfs-common -y
-```
+You need to configure the Kubenetes environment before deploy your own workflows. Fortunately, it is extremely convenient to install, see [k8s-installation.md](../k8s-installation.md). Make sure you have `kubectl` configured correctly on your machine, use `kubectl apply` command with installation yaml file in related folder to install components needed:
 
 ## Deploy cert-manager
 
 ```shell
 kubectl create -f cert-manager/namespace.yaml
 kubectl create -f cert-manager/manifest.yaml
-kubectl -n cert-manager rollout status deployment/cert-manager-webhook
+kubectl rollout status deployment/cert-manager-webhook -n cert-manager
 ```
 
 - Add DNS record Use Cloudflare
@@ -60,15 +52,15 @@ kubectl create -f cert-manager/ClusterIssuer.yaml
 
 ```shell
 kubectl apply -k argocd/
-kubectl -n argocd rollout status statefulset/argocd-application-controller
-kubectl -n argocd rollout status deployment/argocd-repo-server
+kubectl rollout status statefulset/argocd-application-controller -n argocd
+kubectl rollout status deployment/argocd-repo-server -n argocd
 ```
 
 - Get Argo CD Password
 
 ```shell
 PASSWORD=`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`
-echo "Complete. You should be able to navigate to https://argocd.abu.pub admin ${PASSWORD}"
+echo "Complete. You should be able to navigate to https://cd.mlops.pub admin ${PASSWORD}"
 ```
 
 ## Deploy Workflow
@@ -77,9 +69,18 @@ echo "Complete. You should be able to navigate to https://argocd.abu.pub admin $
 
 ```shell
 kubectl apply -k argo-workflows/
-kubectl -n argo rollout status deployment/workflow-controller
-kubectl -n argo rollout status deployment/argo-server
-echo "https://argo.abu.pub"
+kubectl rollout status deployment/workflow-controller -n argo 
+kubectl rollout status deployment/argo-server -n argo
+```
+
+- Get Argo Workflow Password
+
+```shell
+SECRET=$(kubectl get sa argo-server -n argo -o=jsonpath='{.secrets[0].name}')
+ARGO_TOKEN="Bearer $(kubectl get secret $SECRET -n argo -o=jsonpath='{.data.token}' | base64 --decode)"
+echo "https://workflows.mlops.pub"
+echo "${ARGO_TOKEN}"
+#output: Bearer ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltS...
 ```
 
 ## Deploy NFS Server Provisioner
@@ -87,14 +88,14 @@ echo "https://argo.abu.pub"
 ```shell
 kubectl delete sc local-path
 kubectl create -f applications/nfs-server-provisioner.yml
-kubectl -n nfs-server-provisioner rollout status statefulset/nfs-server-provisioner
+kubectl rollout status statefulset/nfs-server-provisioner -n nfs-server-provisioner
 ```
 
 ## Deploy Postgres
 
 ```shell
 kubectl create -f applications/postgresql.yml
-kubectl -n postgresql rollout status statefulset/postgresql-postgresql
+kubectl rollout status statefulset/postgresql-postgresql -n postgresql
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace postgresql postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace postgresql --image docker.io/bitnami/postgresql:11.14.0-debian-10-r28 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgresql -U postgres -d postgres -p 5432
 create database registry;
@@ -102,7 +103,7 @@ create database notary_signer;
 create database notary_server;
 \l
 \q
-kubectl -n postgresql delete pods postgresql-client
+kubectl delete pods postgresql-client -n postgresql
 echo ${POSTGRES_PASSWORD}
 ```
 
@@ -112,25 +113,17 @@ echo ${POSTGRES_PASSWORD}
 
 ```shell
 kubectl create -f applications/harbor.yml
-kubectl -n harbor rollout status deployment harbor-core
-echo "https://harbor.abu.pub admin OpenSource@2022"
+kubectl rollout status deployment harbor-core -n harbor
+echo "https://harbor.mlops.pub admin OpenSource@2022"
 ```
 
 ## Deploy Argo Events
 
 ```shell
-kubectl create namespace argo-events
-kubectl create -f argo-events/install.yaml
-kubectl create -n argo-events -f argo-events/eventbus-native.yaml
-kubectl create -n argo-events -f argo-events/sensor-rbac.yaml
-kubectl create -n argo-events -f argo-events/workflow-rbac.yaml
-kubectl create -f argo-events/role_sensor.yaml
-kubectl create -f argo-events/rolebinding_sensor.yaml
-kubectl create -f argo-events/SA.yaml
-kubectl create -n argo-events -f argo-events/webhook.yaml
-kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
-curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-kubectl -n argo-events get workflows
+kubectl apply -k argo-events/
+
+curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://argoevents-webhook-demo.mlops.pub/example
+kubectl get workflows -n argo-events
 ```
 
 ## Deploy MLOps WorkflowTemplate
@@ -138,35 +131,30 @@ kubectl -n argo-events get workflows
 > Modify Domain in EventSource.yaml & Ingress.yaml
 
 ```shell
-kubectl create -f mlops/Secret.yaml
-kubectl create -f mlops/EventSource.yaml
-kubectl create -f mlops/Ingress.yaml
-kubectl -n argo create secret docker-registry docek-harbor --docker-server=https://harbor.abu.pub --docker-username=admin --docker-password=OpenSource@2022 --docker-email=abuxliu@gmail.com
-kubectl -n argo create -f mlops/WorkflowTemplate.yaml
+kubectl create -f xops/github/namespace.yaml
+kubectl create -f xops/github/Secret.yaml
+kubectl create -f xops/github/EventBus.yaml
+kubectl create -f xops/github/EventSource.yaml
+kubectl create -f xops/github/Ingress.yaml
+# create secret for harbor
+kubectl create secret docker-registry docek-harbor \
+--docker-server=https://harbor.mlops.pub \
+--docker-username=admin \
+--docker-password=OpenSource@2022 \
+--docker-email=guoqiang.qi1@gmail.com \
+-n github-mnist
+# Deploy WorkflowTemplate
+kubectl create -f xops/github/WorkflowTemplate.yaml
 ```
 
-## Deploy mnist Basic
+## Deploy mnist example
 
 ```shell
-kubectl create -f mnist-basic/ns.yaml
-kubectl -n mnist-demo create -f mnist-basic/secret.yaml
-kubectl -n mnist-demo create -f mnist-basic/create-serviceaccounts.yaml
-kubectl -n mnist-demo create -f mnist-basic/Ingress.yaml
-```
-
-## Deploy MLOps
-
-```shell
-# Manual
-kubectl -n argo create -f mlops/Workflow.yaml
-# or Auto
-kubectl create -f mlops/Sensor.yaml
-```
-
-## Again
-
-```shell
-kubectl -n argocd delete applications mnist
+kubectl create -f xops/github/create-serviceaccounts.yaml
+# Trigger workflows with github push events
+kubectl create -f xops/github/Sensor.yaml
+# Trigger workflows immediately
+kubectl create -f xops/github/Workflow.yaml
 ```
 
 ## Reference

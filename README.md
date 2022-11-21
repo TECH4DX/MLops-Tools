@@ -179,5 +179,4 @@ You can deploy your first MLops application in just a few steps, see [cd/example
 
 - See more examples in [Argo Workflows Github Repository](https://github.com/argoproj/argo-workflows/tree/master/examples) and [Argo Events Github Repository](https://github.com/argoproj/argo-events/tree/master/examples).
 
-- We plan to build the developer ultimate experience platform on the mlops Platform, which is also our original intention of building the mlops platform: to help models quickly land and iterate, see the solution:
-![dx-platform](./materials/images/dx-platform.PNG)
+- We plan to build the developer ultimate experience platform on the mlops Platform, which is also our original intention of building the mlops platform: to help models quickly land and iterate.

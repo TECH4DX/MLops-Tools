@@ -14,3 +14,7 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
+      name: port1
+    - port: 50000
+      targetPort: 50000
+      name: port2

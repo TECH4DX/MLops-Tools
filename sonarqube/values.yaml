@@ -77,20 +77,22 @@ nginx:
   enabled: false
 
 ingress:
-  enabled: false
+  enabled: true
   # Used to create an Ingress record.
   hosts:
-    - name: sonarqube.your-org.com
+    - name: sonarqube.mlops.pub
       # Different clouds or configurations might need /* as the default path
       path: /
       # For additional control over serviceName and servicePort
-      # serviceName: someService
-      # servicePort: somePort
+      serviceName: sonarqube-sonarqube
+      servicePort: 9000
       # the pathType can be one of the following values: Exact|Prefix|ImplementationSpecific(default)
       # pathType: ImplementationSpecific
-  annotations: {}
-  # kubernetes.io/ingress.class: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
   # kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
   # This property allows for reports up to a certain size to be uploaded to SonarQube
   # nginx.ingress.kubernetes.io/proxy-body-size: "8m"
 
@@ -374,13 +376,13 @@ emptyDir: {}
 ## for external Databases
 jdbcOverwrite:
   # If enable the JDBC Overwrite, make sure to set `postgresql.enabled=false`
-  enable: false
+  enable: true
   # The JDBC url of the external DB
-  jdbcUrl: "jdbc:postgresql://myPostgress/myDatabase?socketTimeout=1500"
+  jdbcUrl: "jdbc:postgresql://postgresql.postgresql:5432/sonardb"
   # The DB user that should be used for the JDBC connection
-  jdbcUsername: "sonarUser"
+  jdbcUsername: "postgres"
   # Use this if you don't mind the DB password getting stored in plain text within the values file
-  jdbcPassword: "sonarPass"
+  jdbcPassword: "change_password_here"
   ## Alternatively, use a pre-existing k8s secret containing the DB password
   # jdbcSecretName: "sonarqube-jdbc"
   ## and the secretValueKey of the password found within that secret
@@ -390,7 +392,7 @@ jdbcOverwrite:
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 postgresql:
   # Enable to deploy the bitnami PostgreSQL chart
-  enabled: true
+  enabled: false
   ## postgresql Chart global settings
   # global:
   #   imageRegistry: ''

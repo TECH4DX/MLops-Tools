@@ -1,0 +1,45 @@
+pipeline {
+    agent {
+        kubernetes {
+          //cloud 'kubernetes'
+          defaultContainer 'openjdk'
+          yaml '''
+            kind: Pod
+            spec:
+              containers:
+              - name: openjdk
+                image: openjdk:latest
+                imagePullPolicy: Always
+                command:
+                - sleep
+                args:
+                - 99d
+    '''
+        }
+    }
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('SCM') {
+            steps {
+                git 'https://github.com/sunmao-dx/EventRetriever.git'
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'sonar-devops';
+                    withSonarQubeEnv('sonarqube-scanner') { // If you have configured more than one global server connection, you can specify its name
+                    sh "ls ${scannerHome}";
+                    sh "cat ${scannerHome}/bin/sonar-scanner";
+                    sh "${scannerHome}/bin/sonar-scanner -X -Dsonar.projectKey=develop";
+                    }
+                }
+            }
+        }
+    }
+}

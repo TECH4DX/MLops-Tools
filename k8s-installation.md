@@ -111,7 +111,7 @@ $ kubectl get nodes
 Deploy the `CNI` network plug-in on the Master node(May fail, if it fails, please download to local, then install):  
 
 ```bash
-$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+$ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 ```
 Use the `kubectl` tool on the Master node to view the node status again:
 ```bash

@@ -193,3 +193,5 @@ etcd-0               Healthy   {"health":"true"}
     # nfs-share 共享文件系统挂载到 /mnt
     $ sudo mount nfs-server-ip:/home/user/nfs-share /mnt
     ```
+# TODO
+- Install ingress-nginx

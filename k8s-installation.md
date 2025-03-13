@@ -195,6 +195,80 @@ The following parts will be displayed depending on your Helm version.
     $ helm uninstall ingress-nginx -n ingress-nginx   # Uninstall
     ```
 
+## Cert-Manager Install (Optional)
+Cert-manager is an open - source cloud - native certificate management project used to automatically manage and issue TLS certificates from various sources in a Kubernetes cluster. It can issue certificates from a variety of supported sources, including Let’s Encrypt, HashiCorp Vault, Venafi, and private PKI. It ensures that certificates are valid and updated regularly and attempts to renew certificates at an appropriate time before expiration.
+
+- Install cert-manager  
+Cert - manager can be installed via Helm or directly using YAML files. The YAML files provided by Jetstack include all resources (CustomResourceDefinitions and the cert - manager, cainjector, and webhook components) in a single YAML manifest file.
+    ```bash
+    $ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.4.0/cert-manager.yaml
+    ```
+
+- Install Issuer/ClusterIssuer  
+Issuers/ClusterIssuers: They define which certificate authority (CA) to use for issuing certificates. The difference between Issuers and ClusterIssuers is that Issuers are namespace - level resources and can only issue certificates within their own namespace. ClusterIssuer is a cluster - level resource and can issue certificates in any namespace. Note that you need to generate an API token from the DNS service provider of the corresponding domain (here we use Cloudflare).
+    ```yaml
+    ---
+    apiVersion: v1
+    kind: Secret
+    metadata:
+    name: cloudflare-api-token-secret
+    namespace: cert-manager
+    type: Opaque
+    stringData:
+    api-token: xxxxxx
+    ---
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+    name: letsencrypt-dns01
+    spec:
+    acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+        name: letsencrypt-dns01
+        solvers:
+        - dns01:
+            cloudflare:
+            email: guoqiang.qi1@gmail.com
+            apiTokenSecretRef:
+                name: cloudflare-api-token-secret
+                key: api-token
+    ```
+
+- Use Cert-Manager to Issue Certificates in Ingress
+    ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+    name: example-cert-manager
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-dns01
+    spec:
+    tls:
+    - hosts:
+        - your_domain_name.com
+        secretName: example-tls
+    rules:
+    - host: your_domain_name.com
+        http:
+        paths:
+        - path: /
+            pathType: Prefix
+            backend:
+            service:
+                name: example
+                port:
+                number: 80
+    ```
+
+- View the Issued Certificate
+    ```bash
+    $ kubectl get certificate
+    $ kubectl get secret example-tls -o yaml
+    ```
+
 ## NFS Install (Optional)
 - Install server and client
     ```bash

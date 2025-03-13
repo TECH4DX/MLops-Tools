@@ -153,7 +153,49 @@ controller-manager   Healthy   ok
 etcd-0               Healthy   {"health":"true"}  
 ```
 
-## NFS Install
+## Ingress-Nginx-Controller Install (Optional)
+We can quickly complete the installation of the nginx-ingress-controller based on Helm. This installation will mainly be based on the official Helm Chart file and modify some configurations (mainly network settings).
+
+- Add the nginx-ingress-controller repo
+The following parts will be displayed depending on your Helm version.
+    ```bash
+    $ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    $ helm repo update
+    $ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    $ helm search repo ingress-nginx
+    NAME                            CHART VERSION   APP VERSION     DESCRIPTION                                       
+    ingress-nginx/ingress-nginx     4.10.0          1.10.0          Ingress controller for Kubernetes using NGINX a...
+    $ helm pull ingress-nginx/ingress-nginx --version 4.10.0
+    ```
+
+- Modify the values.yaml file
+    ```bash
+    # Modify the nodePort
+    type: NodePort
+    .........Omitted, there are two nodePorts to be modified here.......
+    nodePorts:
+    # -- Node port allocated for the external HTTP listener. If left empty, the service controller allocates one from the configured node port range.
+    http: "80"
+    # -- Node port allocated for the external HTTPS listener. If left empty, the service controller allocates one from the configured node port range.
+    https: "443"
+
+    # Modify hostNetwork and dnsPolicy (Optional)
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+
+    # Configure the installation mode according to requirements: Deployment/DaemonSet
+    kind: Deployment
+    ```
+  
+- Install the ingress-nginx-controller
+    ```bash
+    In the ingress-nginx directory
+    $ kubectl create ns ingress-nginx
+    $ helm install ingress-nginx -n ingress-nginx .   # Install
+    $ helm uninstall ingress-nginx -n ingress-nginx   # Uninstall
+    ```
+
+## NFS Install (Optional)
 - Install server and client
     ```bash
     $ apt install nfs-kernel-server nfs-common
@@ -195,5 +237,3 @@ etcd-0               Healthy   {"health":"true"}
     # nfs-share 共享文件系统挂载到 /mnt
     $ sudo mount nfs-server-ip:/home/user/nfs-share /mnt
     ```
-# TODO
-- Install ingress-nginx
